@@ -1,0 +1,48 @@
+service: aws-node-rest-api
+
+plugins:
+  - serverless-offline
+  - serverless-domain-manager
+
+custom:
+  defaultStage: dev
+  currentStage: ${opt:stage, self:custom.defaultStage}
+  customDomain:
+    domainName: api.yearn.tools
+    stage: ${self:custom.currentStage}
+    basePath: ""
+    certificateName: "*.yearn.tools"
+    createRoute53Record: true
+    endpointType: "regional"
+    securityPolicy: tls_1_2
+    apiType: http
+    # autoDomain: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: ${file(./awsProfile.yml):aws_profile}
+
+functions:
+  user-earnings:
+    handler: services/user/vault/earnings/handler.handler
+    events:
+      - httpApi:
+          path: /user/{id}/vaults/earnings
+          method: get
+
+  loanscan-link:
+    handler: services/loanscan/link/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /loanscan/link
+          method: get
+
+  loanscan-eth-stable:
+    handler: services/loanscan/eth-stable/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /loanscan/ethstable
+          method: get

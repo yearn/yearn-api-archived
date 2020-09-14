@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "serverless-domain-manager": "^4.2.0",
+    "serverless-offline": "^6.7.0"
+  },
+  "dependencies": {
+    "prettier": "^2.1.1"
+  }
+}
