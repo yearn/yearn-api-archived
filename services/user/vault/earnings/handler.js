@@ -7,12 +7,18 @@ const { pluck, uniq } = require("ramda/dist/ramda");
 const BigNumber = require("bignumber.js");
 const Web3 = require("web3");
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
+const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
 
 module.exports.handler = async (event) => {
-  const earnings = await getEarningsData(event.pathParameters.id);
+  const userAddress = event.pathParameters.userAddress;
+  const earnings = await getEarningsData(userAddress);
 
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify(earnings),
   };
 };
@@ -115,14 +121,17 @@ async function getDepositsAndWithdraws(address) {
   }
   `;
 
-  const response = await fetch(process.env.SUBGRAPH_ENDPOINT, {
+  const response = await fetch(subgraphUrl, {
     method: "POST",
     body: JSON.stringify({ query }),
   });
 
-  let { deposits: allDeposits, withdrawals: allWithdrawals } = (
-    await response.json()
-  ).data;
+  const responseJson = await response.json();
+
+  let {
+    deposits: allDeposits,
+    withdrawals: allWithdrawals,
+  } = responseJson.data;
 
   // Use BigNumber for amounts to avoid scientific notation
   allDeposits = allDeposits.map((deposit) => ({

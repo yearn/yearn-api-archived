@@ -1,24 +1,61 @@
-# To get started:
+# Yearn API
 
-## Install serverless
-https://www.serverless.com/framework/docs/getting-started/
+Yearn API is a collection of Serverless API endpoints focused on Yearn integrations.
 
-## Configure local environment
-Optionally create the file awsProfile.yml in the root folder to specify which aws_profile in ~/.aws/credentials serverless should use to deploy.
-This file can be created by copying the contents of example.awsProfile.yml and changing the profile value.
+Yearn API intentions are as follows:
 
-If this step is omitted, you will see a warning about the file not being found, and your default aws profile will be used (I think).
+- Provide free API endpoints to simplify 3rd party integration with Yearn
+- Provide an "API playground" (Swagger UI) anyone can use to quickly browse and test available APIs
+- Document all existing APIs
+- Allow the entire API stack to be forked to enable community involvement in API development
 
-Create a .env file in the root foler to store subgraph and web3 endpoints.
-This file can be created by copying the contents of .example.env and changing the endpoint values.
+## Interact
 
-In the future AWS KMS should probably be used to manage these variables instead.
+https://yearn.tools/swagger
 
+## Setup Instructions
 
-## Use offline mode for local development and testing
-The serverless offline plugin is a dev dependency and can be used to simulate the lambda environment and API gateway locally to run and debug lambda functions.
-Start the server listening for connections with:
+### Clone repoistory
 
-sls offline
+`git clone https://github.com/yearn-integrations/api.git`
 
-See https://www.npmjs.com/package/serverless-offline for further details.
+### Install serverless
+
+`npm install -g serverless`
+
+### Configure local environment
+
+#### Copy .env file
+
+- The ".env" file in the root directory contains various configuration constants utilized by APIs
+- Run the command `cp .env.example .env` to copy .env file template
+- Populate your new .env file with your web3, archive node, and graph endpoints
+- In the future we may utilize AWS KMS to manage these constants
+
+#### Select AWS profile
+
+- Run the command `cp awsProfile.yml.example awsProfile.yml` to copy awsProfile.yml file template
+- By default the AWS profile "default" (in ~/.aws/credentials) is utilized
+- If you'd like to utilize a different AWS profile, edit your new "awsProfile.yml" file to select a profile
+
+## Usage Instructions
+
+### Use "Offline Mode" for local development and testing
+
+- Use the command `sls offline` to test API endpoints locally
+
+## Stages
+
+- Currently three stages are available
+- `prod` is used for production deployments. Production endpoint is https://api.yearn.tools
+- `dev` is used for development purposes. Development endpoint is https://dev-api.yearn.tools
+- `staging` is used for APIs pending production deployment. Staging endpoint is https://staging-api.yearn.tools
+
+### Reset a stage
+
+- Use the command `sls remove --stage dev` to remove all functions and custom domains associated with a stage
+
+### API deployment
+
+- Use the command `sls deploy --stage dev` to deploy
+- You can also deploy a single function using `sls deploy function -f functionName --stage dev`

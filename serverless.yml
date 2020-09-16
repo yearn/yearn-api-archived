@@ -10,10 +10,12 @@ custom:
   defaultStage: dev
   currentStage: ${opt:stage, self:custom.defaultStage}
   customDomain: ${file(./config/serverless/domain.js):${self:custom.currentStage}}
+  serverless-offline:
+    useChildProcesses: true
   basePath: ""
   swaggerDestinations:
-    s3BucketName: "yearn-integrations"
-    s3KeyName: "swagger/api.json"
+    s3BucketName: "yearn.tools"
+    s3KeyName: "swagger/swagger.json"
     acl: public-read
   documentation:
     api:
@@ -25,17 +27,9 @@ custom:
         - name: Vaults
           description: Vault endpoints
         - name: User
-          description: User endpoints
+          description: User endpoints (these APIs are specific to a user account)
         - name: Loanscan
-          description: Loanscan endpoints
-    models:
-      - name: MessageResponse
-        contentType: "application/json"
-        schema:
-          type: object
-          properties:
-            message:
-              type: string
+          description: Loanscan endpoints (not for general consumption)
 
 provider:
   name: aws
@@ -48,15 +42,22 @@ functions:
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
       - http:
-          path: /user/{id}/vaults/earnings
+          path: /user/{userAddress}/vaults/earnings
           method: get
           cors: true
+          request:
+            parameters:
+              paths:
+                userAddress: true
           documentation:
             summary: Returns vault earnings per user
             tags:
               - User
             description: >
               Vault earnings are calculated using the yearn subgraph
+          pathParams:
+            - name: "userAddress"
+              description: "User account address. Format: 0x{...}"
 
   loanscan-link:
     handler: services/loanscan/link/handler.handler
@@ -146,15 +147,7 @@ functions:
             tags:
               - Vaults
             description: >
-              Vault APY is calculated based on the following document: lhttps://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
-            methodResponses:
-              - statusCode: "200"
-                responseModels:
-                  "application/json": MessageResponse
-                responseHeaders:
-                  - name: link
-                    description: describes other actions that can be taken
-                    type: string
+              Vault APY is calculated based on the following document: https://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
 
   save-apy:
     handler: services/vaults/save-apy/handler.handler
