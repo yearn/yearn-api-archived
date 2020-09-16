@@ -1,4 +1,4 @@
-service: aws-node-rest-api
+service: yearn
 
 plugins:
   - serverless-offline
@@ -8,6 +8,7 @@ custom:
   defaultStage: dev
   currentStage: ${opt:stage, self:custom.defaultStage}
   customDomain: ${file(./config/serverless/domain.js):${self:custom.currentStage}}
+  basePath: ""
 
 provider:
   name: aws
@@ -17,6 +18,7 @@ provider:
 functions:
   user-earnings:
     handler: services/user/vault/earnings/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
       - httpApi:
           path: /user/{id}/vaults/earnings
@@ -36,4 +38,44 @@ functions:
     events:
       - httpApi:
           path: /loanscan/ethstable
+          method: get
+
+  loanscan-ycrv:
+    handler: services/loanscan/ycrv/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /loanscan/ycrv
+          method: get
+
+  loanscan-crvbtc:
+    handler: services/loanscan/crvbtc/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /loanscan/crvbtc
+          method: get
+
+  loanscan-crvbusd:
+    handler: services/loanscan/crvbusd/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /loanscan/crvbusd
+          method: get
+
+  get-apy:
+    handler: services/apy/get-apy/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /apy
+          method: get
+
+  save-apy:
+    handler: services/apy/save-apy/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - httpApi:
+          path: /apy/save
           method: get

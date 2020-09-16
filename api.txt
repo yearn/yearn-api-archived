@@ -1,5 +1,0 @@
-GET https://api.yearn.tools/apy
-GET https://api.yearn.tools/user/{id}/vaults/positions
-GET https://api.yearn.tools/user/{id}/vaults/earnings
-GET https://api.yearn.tools/vaults/earnings
-GET https://api.yearn.tools/vault/{id}/earnings
