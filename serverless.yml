@@ -3,12 +3,39 @@ service: yearn
 plugins:
   - serverless-offline
   - serverless-domain-manager
+  - serverless-aws-documentation
+  - serverless-export-swagger
 
 custom:
   defaultStage: dev
   currentStage: ${opt:stage, self:custom.defaultStage}
   customDomain: ${file(./config/serverless/domain.js):${self:custom.currentStage}}
   basePath: ""
+  swaggerDestinations:
+    s3BucketName: "yearn-integrations"
+    s3KeyName: "swagger/api.json"
+    acl: public-read
+  documentation:
+    api:
+      info:
+        version: "1"
+        title: Yearn API
+        description: Yearn API
+      tags:
+        - name: Vaults
+          description: Vault endpoints
+        - name: User
+          description: User endpoints
+        - name: Loanscan
+          description: Loanscan endpoints
+    models:
+      - name: MessageResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
 
 provider:
   name: aws
@@ -20,62 +47,115 @@ functions:
     handler: services/user/vault/earnings/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
+      - http:
           path: /user/{id}/vaults/earnings
           method: get
+          cors: true
+          documentation:
+            summary: Returns vault earnings per user
+            tags:
+              - User
+            description: >
+              Vault earnings are calculated using the yearn subgraph
 
   loanscan-link:
     handler: services/loanscan/link/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
+      - http:
           path: /loanscan/link
           method: get
+          cors: true
+          documentation:
+            summary: Returns APY for LINK
+            tags:
+              - Loanscan
+            description: >
+              LINK APY actually comes from the aLINK vault. aLINK vault cannot be relied on directly due to use of insurance
 
   loanscan-eth-stable:
     handler: services/loanscan/eth-stable/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
+      - http:
           path: /loanscan/ethstable
           method: get
+          cors: true
+          documentation:
+            summary: Returns stablecoin vault APYs as well as eth vault APY
+            tags:
+              - Loanscan
+            description: >
+              APY for following vaults: ETH, USDC, USDT, TUSD, DAI
 
   loanscan-ycrv:
     handler: services/loanscan/ycrv/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
+      - http:
           path: /loanscan/ycrv
           method: get
+          cors: true
+          documentation:
+            summary: Get yCrv APY
+            tags:
+              - Loanscan
+            description: >
+              yCrv APY is an aggregate APY. This API combines vault APY with underlying Curve pool APY. Aggregation formula: ((1 + poolApy) * (1 + vaultApy) - 1) * 100;
 
   loanscan-crvbtc:
     handler: services/loanscan/crvbtc/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
+      - http:
           path: /loanscan/crvbtc
           method: get
+          cors: true
+          documentation:
+            summary: Get crvBTC APY
+            tags:
+              - Loanscan
+            description: >
+              crvBTC APY is an aggregate APY. This API combines vault APY with underlying Curve pool APY. Aggregation formula: ((1 + poolApy) * (1 + vaultApy) - 1) * 100;
 
   loanscan-crvbusd:
     handler: services/loanscan/crvbusd/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
+      - http:
           path: /loanscan/crvbusd
           method: get
+          cors: true
+          documentation:
+            summary: Get crvBUSD APY
+            tags:
+              - Loanscan
+            description: >
+              crvBUSD APY is an aggregate APY. This API combines vault APY with underlying Curve pool APY. Aggregation formula: ((1 + poolApy) * (1 + vaultApy) - 1) * 100;
 
   get-apy:
-    handler: services/apy/get-apy/handler.handler
+    handler: services/vaults/get-apy/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
-      - httpApi:
-          path: /apy
+      - http:
+          path: /vaults/apy
           method: get
+          cors: true
+          documentation:
+            summary: Get APY for all vaults
+            tags:
+              - Vaults
+            description: >
+              Vault APY is calculated based on the following document: lhttps://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
+            methodResponses:
+              - statusCode: "200"
+                responseModels:
+                  "application/json": MessageResponse
+                responseHeaders:
+                  - name: link
+                    description: describes other actions that can be taken
+                    type: string
 
   save-apy:
-    handler: services/apy/save-apy/handler.handler
+    handler: services/vaults/save-apy/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    events:
-      - httpApi:
-          path: /apy/save
-          method: get

@@ -1,11 +1,9 @@
 {
   "devDependencies": {
+    "prettier": "^2.1.1",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-domain-manager": "^4.2.0",
-    "serverless-offline": "^6.7.0",
-    "serverless-openapi-documentation": "^0.4.0"
-  },
-  "dependencies": {
-    "prettier": "^2.1.1"
+    "serverless-export-swagger": "^2.0.0",
+    "serverless-offline": "^6.7.0"
   }
 }

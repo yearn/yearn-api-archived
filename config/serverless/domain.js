@@ -7,7 +7,7 @@ const DEFAULT = {
   createRoute53Record: true,
   basePath: "${self:custom.basePath}",
   endpointType: "regional",
-  apiType: "http",
+  apiType: "rest",
   securityPolicy: "tls_1_2",
   autoDomain: true,
   // allowPathMatching: true, // enable only once when migrating from rest to http api migration
