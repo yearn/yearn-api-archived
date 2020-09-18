@@ -1,3 +1,4 @@
+require("dotenv").config();
 const AWS = require("aws-sdk");
 const db = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
 const Web3 = require("web3");
@@ -6,11 +7,8 @@ const delay = require("delay");
 const _ = require("lodash");
 const vaults = require("./vaults");
 const EthDater = require("./ethereum-block-by-date.js");
-const { delayTime, apiKeys } = require("./config");
+const { delayTime } = require("./config");
 const poolABI = require("./abis/pool");
-
-require("dotenv").config();
-
 const archiveNodeUrl = process.env.ARCHIVENODE_ENDPOINT;
 const infuraUrl = process.env.WEB3_ENDPOINT;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);

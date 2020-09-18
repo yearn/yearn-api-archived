@@ -22,7 +22,7 @@ module.exports.handler = async (event) => {
     return loanScanData;
   };
 
-  const loanScanResponse = _.map(assets, getLoanscanFormat);
+  const loanScanResponse = { lendRates: _.map(assets, getLoanscanFormat) };
 
   const response = {
     statusCode: 200,

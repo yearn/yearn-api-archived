@@ -9,10 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bignumber": "^1.1.0",
-    "dotenv": "^8.2.0",
-    "node-fetch": "^2.6.1",
-    "ramda": "^0.27.1",
-    "web3": "^1.2.11"
+    "ramda": "^0.27.1"
   }
 }

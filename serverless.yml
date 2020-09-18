@@ -50,7 +50,7 @@ functions:
               paths:
                 userAddress: true
           documentation:
-            summary: Returns vault earnings per user
+            summary: Vault earnings per user
             tags:
               - User
             description: >
@@ -68,7 +68,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Returns APY for LINK
+            summary: LINK vault APY
             tags:
               - Loanscan
             description: >
@@ -83,7 +83,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Returns stablecoin vault APYs as well as eth vault APY
+            summary: Stablecoin vault APYs and ETH vault APY
             tags:
               - Loanscan
             description: >
@@ -98,7 +98,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Get yCrv APY
+            summary: yCrv vault APY aggregated with Curve pool APY
             tags:
               - Loanscan
             description: >
@@ -113,7 +113,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Get crvBTC APY
+            summary: crvBTC vault APY aggregated with Curve pool APY
             tags:
               - Loanscan
             description: >
@@ -128,14 +128,14 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Get crvBUSD APY
+            summary: crvBUSD vault APY aggregated with Curve pool APY
             tags:
               - Loanscan
             description: >
               crvBUSD APY is an aggregate APY. This API combines vault APY with underlying Curve pool APY. Aggregation formula: ((1 + poolApy) * (1 + vaultApy) - 1) * 100;
 
-  get-apy:
-    handler: services/vaults/get-apy/handler.handler
+  apy:
+    handler: services/vaults/apy/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
       - http:
@@ -143,11 +143,30 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Get APY for all vaults
+            summary: APY for all vaults
             tags:
               - Vaults
             description: >
               Vault APY is calculated based on the following document: https://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
+
+  vaults:
+    handler: services/vaults/vaults/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /vaults
+          method: get
+          cors: true
+          documentation:
+            summary: Get vaults from the vault registry
+            tags:
+              - Vaults
+            description: >
+              Vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0). Includes controller/strategy info. Updates once an hour.
+
+  save-vaults:
+    handler: services/vaults/save-vaults/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
 
   save-apy:
     handler: services/vaults/save-apy/handler.handler
