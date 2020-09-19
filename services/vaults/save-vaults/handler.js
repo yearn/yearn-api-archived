@@ -9,7 +9,13 @@ const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 const yRegistryAbi = require("./abis/yRegistry");
 const yRegistryAddress = "0x3ee41c098f9666ed2ea246f4d2558010e59d63a0";
 const delay = require("delay");
-const delayTime = 100;
+const delayTime = 500;
+
+const tokenSymbolAliases = {
+	"yDAI+yUSDC+yUSDT+yTUSD": "yCRV",
+	crvRenWSBTC: "crvBTC",
+	"yDAI+yUSDC+yUSDT+yBUSD": "crvBTC",
+};
 
 const fetchContractMetadata = async (address) => {
 	const url = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}&apikey=${etherscanApiKey}`;
@@ -83,19 +89,23 @@ module.exports.handler = async (event) => {
 		const vaultSymbol = await callContractMethod(vaultContract, "symbol");
 		const tokenSymbol = vaultSymbol.substring(1);
 		const tokenAddress = vaultInfo.tokenArray[idx];
-		const tokenName =
-			tokenSymbol === "USDC" ? "USD Coin" : _.trimStart(vaultName, "yearn ");
+		const tokenName = vaultName.substring(6);
 		const decimals = parseInt(
 			await callContractMethod(vaultContract, "decimals"),
 			10
 		);
+
 		const tokenInfo = await fetch(
 			`https://api.coingecko.com/api/v3/coins/ethereum/contract/${tokenAddress}`
 		).then((res) => res.json());
+		const tokenSymbolAlias = tokenSymbolAliases[tokenSymbol] || tokenSymbol;
+		const vaultAlias = `${tokenSymbolAlias} Vault`;
 		const tokenIcon = tokenInfo.image.small;
+
 		const vault = {
 			address: vaultAddress,
 			name: vaultName,
+			vaultAlias,
 			symbol: vaultSymbol,
 			controllerAddress: controllerAddress,
 			controllerName: await fetchContractName(controllerAddress),
@@ -104,6 +114,7 @@ module.exports.handler = async (event) => {
 			tokenAddress: tokenAddress,
 			tokenName: tokenName,
 			tokenSymbol: tokenSymbol,
+			tokenSymbolAlias,
 			tokenIcon: tokenIcon,
 			decimals: decimals,
 			wrapped: vaultInfo.isWrappedArray[idx],
