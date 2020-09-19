@@ -74,7 +74,6 @@ module.exports.handler = async (event) => {
 	await delay(delayTime);
 
 	const getVault = async (vaultAddress, idx) => {
-		const vault = {};
 		const controllerAddress = vaultInfo.controllerArray[idx];
 		const strategyAddress = vaultInfo.strategyArray[idx];
 		const vaultContract = await getContract(vaultAddress);
@@ -94,22 +93,23 @@ module.exports.handler = async (event) => {
 			`https://api.coingecko.com/api/v3/coins/ethereum/contract/${tokenAddress}`
 		).then((res) => res.json());
 		const tokenIcon = tokenInfo.image.small;
-
-		vault.address = vaultAddress;
-		vault.name = vaultName;
-		vault.symbol = vaultSymbol;
-		vault.controllerAddress = controllerAddress;
-		vault.controllerName = await fetchContractName(controllerAddress);
-		vault.strategyAddress = strategyAddress;
-		vault.strategyName = await fetchContractName(strategyAddress);
-		vault.tokenAddress = tokenAddress;
-		vault.tokenName = tokenName;
-		vault.tokenSymbol = tokenSymbol;
-		vault.tokenIcon = tokenIcon;
-		vault.decimals = decimals;
-		vault.wrapped = vaultInfo.isWrappedArray[idx];
-		vault.delegated = vaultInfo.isDelegatedArray[idx];
-
+		const vault = {
+			address: vaultAddress,
+			name: vaultName,
+			symbol: vaultSymbol,
+			controllerAddress: controllerAddress,
+			controllerName: await fetchContractName(controllerAddress),
+			strategyAddress: strategyAddress,
+			strategyName: await fetchContractName(strategyAddress),
+			tokenAddress: tokenAddress,
+			tokenName: tokenName,
+			tokenSymbol: tokenSymbol,
+			tokenIcon: tokenIcon,
+			decimals: decimals,
+			wrapped: vaultInfo.isWrappedArray[idx],
+			delegated: vaultInfo.isDelegatedArray[idx],
+			timestamp: Date.now(),
+		};
 		await saveVault(vault);
 		return vault;
 	};
