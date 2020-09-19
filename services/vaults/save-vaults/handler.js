@@ -27,7 +27,7 @@ const vaultAliases = {
 
 const vaultIcons = {
 	"yDAI+yUSDC+yUSDT+yTUSD":
-		"https://assets.coingecko.com/coins/images/12210/small/yUSD.png?1600166557",
+		"https://assets.coingecko.com/coins/images/12210/large/yUSD.png?1600166557",
 };
 
 const fetchContractMetadata = async (address) => {
@@ -115,7 +115,7 @@ module.exports.handler = async (event) => {
 		const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
 		const vaultAlias =
 			vaultAliases[vaultAddress] || `${tokenSymbolAlias} Vault`;
-		const tokenIcon = tokenInfo.image.small;
+		const tokenIcon = tokenInfo.image.large;
 		const vaultIcon = vaultIcons[tokenSymbol];
 		const vault = {
 			address: vaultAddress,
