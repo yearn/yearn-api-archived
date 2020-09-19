@@ -168,8 +168,16 @@ functions:
     handler: services/vaults/save-vaults/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 300
+    events:
+      - http:
+          path: /vaults/save
+          method: get
 
   save-apy:
     handler: services/vaults/save-apy/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 300
+    events:
+      - http:
+          path: /vaults/apy/save
+          method: get

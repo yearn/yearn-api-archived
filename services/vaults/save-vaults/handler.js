@@ -14,7 +14,20 @@ const delayTime = 500;
 const tokenSymbolAliases = {
 	"yDAI+yUSDC+yUSDT+yTUSD": "yCRV",
 	crvRenWSBTC: "crvBTC",
-	"yDAI+yUSDC+yUSDT+yBUSD": "crvBTC",
+	"yDAI+yUSDC+yUSDT+yBUSD": "crvBUSD",
+};
+
+const symbolAliases = {
+	"yyDAI+yUSDC+yUSDT+yTUSD": "yUSD",
+};
+
+const vaultAliases = {
+	"0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c": "yUSD Vault",
+};
+
+const vaultIcons = {
+	"yDAI+yUSDC+yUSDT+yTUSD":
+		"https://assets.coingecko.com/coins/images/12210/small/yUSD.png?1600166557",
 };
 
 const fetchContractMetadata = async (address) => {
@@ -99,14 +112,18 @@ module.exports.handler = async (event) => {
 			`https://api.coingecko.com/api/v3/coins/ethereum/contract/${tokenAddress}`
 		).then((res) => res.json());
 		const tokenSymbolAlias = tokenSymbolAliases[tokenSymbol] || tokenSymbol;
-		const vaultAlias = `${tokenSymbolAlias} Vault`;
+		const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
+		const vaultAlias =
+			vaultAliases[vaultAddress] || `${tokenSymbolAlias} Vault`;
 		const tokenIcon = tokenInfo.image.small;
-
+		const vaultIcon = vaultIcons[tokenSymbol];
 		const vault = {
 			address: vaultAddress,
 			name: vaultName,
 			vaultAlias,
+			vaultIcon,
 			symbol: vaultSymbol,
+			symbolAlias,
 			controllerAddress: controllerAddress,
 			controllerName: await fetchContractName(controllerAddress),
 			strategyAddress: strategyAddress,
