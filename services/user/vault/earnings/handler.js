@@ -8,10 +8,16 @@ const BigNumber = require("bignumber.js");
 const Web3 = require("web3");
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
+const _ = require("lodash");
 
 module.exports.handler = async (event) => {
   const userAddress = event.pathParameters.userAddress;
-  const earnings = await getEarningsData(userAddress);
+
+  const activityData = await getActivityData(userAddress);
+  const earningsPerVaultData = await buildEarningsPerVaultData(
+    userAddress,
+    activityData
+  );
 
   return {
     statusCode: 200,
@@ -19,57 +25,152 @@ module.exports.handler = async (event) => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: JSON.stringify(earnings),
+    body: JSON.stringify(earningsPerVaultData),
   };
 };
 
-async function getEarningsData(address) {
-  const { allDeposits, allWithdrawals } = await getDepositsAndWithdraws(
-    address
-  );
+async function getActivityData(address) {
+  const query = `
+  { 
+      allDeposits: deposits (where: {account: "${address}"}, orderBy: blockNumber) {
+        tx: id
+        vaultAddress
+        amount
+        timestamp
+      }
+      allWithdrawals: withdraws (where: {account: "${address}"}, orderBy: blockNumber) { 
+        tx: id
+        vaultAddress
+        amount
+        timestamp
+      }
+        allTransfersIn: transfers(where: {to: "${address}", from_not: "0x0000000000000000000000000000000000000000"}, orderBy: blockNumber) {
+        tx: id
+        from
+        to
+        shares: value
+        timestamp
+        vaultAddress
+        pricePerFullShare: getPricePerFullShare
+        balance
+        totalSupply
+      }
+      allTransfersOut: transfers(where: {from: "${address}", to_not: "0x0000000000000000000000000000000000000000"}, orderBy: blockNumber) {
+        tx: id
+        from
+        to
+        shares: value
+        timestamp
+        vaultAddress
+        pricePerFullShare: getPricePerFullShare
+        balance
+        totalSupply
+      }
+    }
+  `;
+
+  const response = await fetch(subgraphUrl, {
+    method: "POST",
+    body: JSON.stringify({ query }),
+  });
+
+  const responseJson = await response.json();
+  return responseJson.data;
+}
+
+async function buildEarningsPerVaultData(address, activityData) {
+  let {
+    allDeposits,
+    allWithdrawals,
+    allTransfersIn,
+    allTransfersOut,
+  } = activityData;
+
+  // Calculate and populate token amounts for transfers
+  allTransfersIn = allTransfersIn.map((transfer) => ({
+    ...transfer,
+    amount: calculateTransferTokenAmount(transfer),
+  }));
+
+  allTransfersOut = allTransfersOut.map((transfer) => ({
+    ...transfer,
+    amount: calculateTransferTokenAmount(transfer),
+  }));
+
+  // Use BigNumber for all large numbers to avoid scientific notation.
+  allDeposits = convertFieldsToBigNumber(allDeposits, ["amount"]);
+  allWithdrawals = convertFieldsToBigNumber(allWithdrawals, ["amount"]);
+
+  allTransfersIn = convertFieldsToBigNumber(allTransfersIn, [
+    "shares",
+    "pricePerFullShare",
+    "balance",
+    "totalSupply",
+    "amount",
+  ]);
+
+  allTransfersOut = convertFieldsToBigNumber(allTransfersOut, [
+    "shares",
+    "pricePerFullShare",
+    "balance",
+    "totalSupply",
+    "amount",
+  ]);
 
   // Get all the vaults the address has interacted with.
   const vaultAddresses = uniq([
     ...pluck("vaultAddress", allDeposits),
     ...pluck("vaultAddress", allWithdrawals),
+    ...pluck("vaultAddress", allTransfersIn),
+    ...pluck("vaultAddress", allTransfersOut),
   ]);
 
   // Get current holdings for all vaults address has interacted with.
   const allHoldings = await getHoldingsData(address, vaultAddresses);
 
-  // assemble data into final format inluding vault metadata, holdings, earned, deposits and withdrawals.
+  // Assemble data into final format including vault metadata, holdings, earned, deposits, withdrawals and transfers.
+  // This essentially collates the data per vault, adds totals and removes fields needed up unti now, but that we
+  // don't want to return to the API user.
   let earningsByVault = vaultAddresses.map((vaultAddress) => {
-    // Omit vaultAddress from output, only needed up to this stage to filter deposits and withdrawals by vault.
-    // Also format amount for display.
     const depositsToVault = allDeposits
       .filter((deposit) => deposit.vaultAddress === vaultAddress)
-      .map((deposit) => {
-        delete deposit.vaultAddress;
-        return { ...deposit, amount: deposit.amount.toFixed(0) };
-      });
+      .map((deposit) => _.omit(deposit, "vaultAddress"));
 
     const withdrawalsFromVault = allWithdrawals
-      .filter((withdraw) => withdraw.vaultAddress === vaultAddress)
-      .map((withdraw) => {
-        delete withdraw.vaultAddress;
-        return { ...withdraw, amount: withdraw.amount.toFixed(0) };
-      });
+      .filter((withdrawal) => withdrawal.vaultAddress === vaultAddress)
+      .map((withdrawal) => _.omit(withdrawal, "vaultAddress"));
+
+    const transfersIntoVault = allTransfersIn
+      .filter((transfer) => transfer.vaultAddress === vaultAddress)
+      .map(stripUnneededTransferFields);
+
+    const transfersOutOfVault = allTransfersOut
+      .filter((transfer) => transfer.vaultAddress === vaultAddress)
+      .map(stripUnneededTransferFields);
 
     // Calculate deposit and withdrawal totals.
     const totalDepositedToVault = depositsToVault.reduce(
-      (totalDeposited, deposit) => {
-        return totalDeposited.plus(deposit.amount);
-      },
+      (totalDeposited, deposit) => totalDeposited.plus(deposit.amount),
       new BigNumber(0),
       depositsToVault
     );
 
     const totalWithdrawnFromVault = withdrawalsFromVault.reduce(
-      (totalWithdrawn, withdrawl) => {
-        return totalWithdrawn.plus(withdrawl.amount);
-      },
+      (totalWithdrawn, withdrawl) => totalWithdrawn.plus(withdrawl.amount),
       new BigNumber(0),
       withdrawalsFromVault
+    );
+
+    const totalTransferredIntoVault = transfersIntoVault.reduce(
+      (totalTransferred, transfer) => totalTransferred.plus(transfer.amount),
+      new BigNumber(0),
+      transfersIntoVault
+    );
+
+    const totalTransferredOutOfVault = transfersOutOfVault.reduce(
+      (totalTransferred, transfer) => totalTransferred.plus(transfer.amount),
+      new BigNumber(0),
+      transfersOutOfVault
     );
 
     let vaultMetadata = vaultsConfig.find(
@@ -80,20 +181,31 @@ async function getEarningsData(address) {
     let holdingsInVault = allHoldings.find(
       (holding) => holding.vaultAddress === vaultAddress
     ).holdings;
+
     let vaultEarnings = {
       vault: vaultMetadata,
       earned: holdingsInVault
         .minus(totalDepositedToVault)
         .plus(totalWithdrawnFromVault)
+        .minus(totalTransferredIntoVault)
+        .plus(totalTransferredOutOfVault)
         .toFixed(0),
       holdings: holdingsInVault.toFixed(0),
       deposits: {
         total: totalDepositedToVault.toFixed(0),
-        breakdown: depositsToVault,
+        breakdown: depositsToVault.map(formatBreakdownItem),
       },
       withdrawals: {
         total: totalWithdrawnFromVault.toFixed(0),
-        breakdown: withdrawalsFromVault,
+        breakdown: withdrawalsFromVault.map(formatBreakdownItem),
+      },
+      transfersIn: {
+        total: totalTransferredIntoVault.toFixed(0),
+        breakdown: transfersIntoVault.map(formatBreakdownItem),
+      },
+      transfersOut: {
+        total: totalTransferredOutOfVault.toFixed(0),
+        breakdown: transfersOutOfVault.map(formatBreakdownItem),
       },
     };
 
@@ -103,47 +215,36 @@ async function getEarningsData(address) {
   return earningsByVault;
 }
 
-async function getDepositsAndWithdraws(address) {
-  const query = `
-  {
-    deposits(where: {account: "${address}"}) {
-      tx: id
-      vaultAddress
-      amount
-      timestamp
-    }
-    withdrawals: withdraws(where: {account: "${address}"}) {
-      tx: id
-      vaultAddress
-      amount
-      timestamp
-    }
-  }
-  `;
+function stripUnneededTransferFields(transfer) {
+  return _.omit(transfer, [
+    "vaultAddress",
+    "shares",
+    "pricePerFullShare",
+    "totalSupply",
+    "balance",
+  ]);
+}
 
-  const response = await fetch(subgraphUrl, {
-    method: "POST",
-    body: JSON.stringify({ query }),
+function formatBreakdownItem(breakdownItem) {
+  return {
+    ...breakdownItem,
+    amount: breakdownItem.amount.toFixed(0),
+    tx: breakdownItem.tx.slice(0, 66),
+  };
+}
+
+function calculateTransferTokenAmount(transfer) {
+  return (transfer.balance * transfer.shares) / transfer.totalSupply;
+}
+
+function convertFieldsToBigNumber(entities, fields) {
+  return entities.map((entity) => {
+    fields.forEach((field) => {
+      entity[field] = new BigNumber(entity[field]);
+    });
+
+    return entity;
   });
-
-  const responseJson = await response.json();
-
-  let {
-    deposits: allDeposits,
-    withdrawals: allWithdrawals,
-  } = responseJson.data;
-
-  // Use BigNumber for amounts to avoid scientific notation
-  allDeposits = allDeposits.map((deposit) => ({
-    ...deposit,
-    amount: new BigNumber(deposit.amount),
-  }));
-  allWithdrawals = allWithdrawals.map((withdrawal) => ({
-    ...withdrawal,
-    amount: new BigNumber(withdrawal.amount),
-  }));
-
-  return { allDeposits, allWithdrawals };
 }
 
 async function getHoldingsData(address, vaultAddresses) {
