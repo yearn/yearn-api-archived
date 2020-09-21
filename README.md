@@ -11,7 +11,7 @@ Yearn API intentions are as follows:
 
 ## Interact
 
-https://yearn.tools/swagger
+https://yearn.tools
 
 ## Setup Instructions
 
