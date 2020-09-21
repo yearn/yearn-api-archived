@@ -3,8 +3,8 @@ service: yearn
 plugins:
   - serverless-offline
   - serverless-domain-manager
-  - serverless-aws-documentation
   - serverless-export-swagger
+  - serverless-aws-documentation
 
 custom:
   defaultStage: dev
@@ -20,7 +20,7 @@ custom:
   documentation:
     api:
       info:
-        version: "1"
+        version: "1.01"
         title: Yearn API
         description: Yearn API
       tags:
@@ -35,9 +35,147 @@ provider:
   name: aws
   runtime: nodejs12.x
   profile: ${file(./awsProfile.yml):aws_profile}
-
 functions:
-  user-earnings:
+  # /vaults
+  vaults:
+    handler: services/vaults/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /vaults
+          method: get
+          cors: true
+          documentation:
+            summary: Gets all vaults from the vault registry
+            tags:
+              - Vaults
+            description: Vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0). Includes controller/strategy info. Updates once an hour.
+
+  vaults-snapshots:
+    handler: services/vaults/snapshots/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /vaults/snapshots
+          method: get
+          cors: true
+          documentation:
+            summary: Gets current snapshots of all vaults from the Yearn subgraph
+            tags:
+              - Vaults
+            description: >
+              Currently the subgraph is indexing 8 out of 11 vaults. More vaults to be added later.
+
+  vaults-save:
+    handler: services/vaults/save/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 300
+
+  vaults-apy:
+    handler: services/vaults/apy/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /vaults/apy
+          method: get
+          cors: true
+          documentation:
+            summary: Gets APY for all vaults
+            tags:
+              - Vaults
+            description: >
+              Vault APY is calculated based on the following document: https://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
+
+  vaults-apy-save:
+    handler: services/vaults/apy/save/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 300
+
+  # /user
+  user-vaults:
+    handler: services/user/vaults/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /user/{userAddress}/vaults
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                userAddress: true
+              querystrings:
+                statistics: false
+                transactions: false
+                showall: false
+          documentation:
+            summary: Gets all vaults a user has interacted with
+            tags:
+              - User
+            description: >
+              Optionally include vault statistics and transactions per user. Valid query param values are "true" and "false"
+          pathParams:
+            - name: "userAddress"
+              description: "User account address. Format: 0x{...}"
+          queryParams:
+            - name: "transactions"
+              description: "Include user vault transactions"
+              type: "boolean"
+              required: false
+            - name: "showall"
+              description: "Inclue all vaults (including vaults the user has not interacted with)"
+              type: "boolean"
+              required: false
+            - name: "statistics"
+              description: "Include user vault statistics (deposits, withdraws, transfers)"
+              type: "boolean"
+              required: false
+
+  user-vaults-transactions:
+    handler: services/user/vaults/transactions/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /user/{userAddress}/vaults/transactions
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                userAddress: true
+          documentation:
+            summary: Gets all user transactions per vault (deposits, withdraws, transferIn, transferOut)
+            tags:
+              - User
+            description: >
+              Includes amount/shares, calculated by tracing the Yearn vault contract methods. Transactions come from the Yearn subgraph.
+          pathParams:
+            - name: "userAddress"
+              description: "User account address. Format: 0x{...}"
+
+  user-vaults-statistics:
+    handler: services/user/vaults/statistics/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /user/{userAddress}/vaults/statistics
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                userAddress: true
+          documentation:
+            summary: Gets vault statistics assocaited with a user. Total earnings, deposits, withdrawals, transfers.
+            tags:
+              - User
+            description: >
+              Currently earnings include token transfer events (such as zaps). This should be configurable in the future. Statistics come from the Yearn subgraph.
+          pathParams:
+            - name: "userAddress"
+              description: "User account address. Format: 0x{...}"
+
+  user-vaults-earnings:
     handler: services/user/vault/earnings/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
@@ -49,16 +187,11 @@ functions:
             parameters:
               paths:
                 userAddress: true
-          documentation:
-            summary: Vault earnings per user
-            tags:
-              - User
-            description: >
-              Vault earnings are calculated using the yearn subgraph
           pathParams:
             - name: "userAddress"
               description: "User account address. Format: 0x{...}"
 
+  # /loanscan
   loanscan-link:
     handler: services/loanscan/link/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
@@ -68,7 +201,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: LINK vault APY
+            summary: Gets LINK vault APY
             tags:
               - Loanscan
             description: >
@@ -83,7 +216,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Stablecoin vault APYs and ETH vault APY
+            summary: Gets stablecoin vault APYs and ETH vault APY
             tags:
               - Loanscan
             description: >
@@ -98,7 +231,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: yCrv vault APY aggregated with Curve pool APY
+            summary: Gets yCrv vault APY aggregated with Curve pool APY
             tags:
               - Loanscan
             description: >
@@ -113,7 +246,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: crvBTC vault APY aggregated with Curve pool APY
+            summary: Gets crvBTC vault APY aggregated with Curve pool APY
             tags:
               - Loanscan
             description: >
@@ -128,56 +261,8 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: crvBUSD vault APY aggregated with Curve pool APY
+            summary: Gets crvBUSD vault APY aggregated with Curve pool APY
             tags:
               - Loanscan
             description: >
               crvBUSD APY is an aggregate APY. This API combines vault APY with underlying Curve pool APY. Aggregation formula: ((1 + poolApy) * (1 + vaultApy) - 1) * 100;
-
-  apy:
-    handler: services/vaults/apy/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    events:
-      - http:
-          path: /vaults/apy
-          method: get
-          cors: true
-          documentation:
-            summary: APY for all vaults
-            tags:
-              - Vaults
-            description: >
-              Vault APY is calculated based on the following document: https://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
-
-  vaults:
-    handler: services/vaults/vaults/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    events:
-      - http:
-          path: /vaults
-          method: get
-          cors: true
-          documentation:
-            summary: Get vaults from the vault registry
-            tags:
-              - Vaults
-            description: >
-              Vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0). Includes controller/strategy info. Updates once an hour.
-
-  save-vaults:
-    handler: services/vaults/save-vaults/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    timeout: 300
-    events:
-      - http:
-          path: /vaults/save
-          method: get
-
-  save-apy:
-    handler: services/vaults/save-apy/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    timeout: 300
-    events:
-      - http:
-          path: /vaults/apy/save
-          method: get
