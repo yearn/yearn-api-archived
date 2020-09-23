@@ -6,6 +6,7 @@ const {
   getVaultAddressesForUser,
 } = require("./transactions/handler");
 const { getVaultsStatistics } = require("./statistics/handler");
+const { getVaultsApy } = require("./../../vaults/apy/handler");
 const { getVaults } = require("../../vaults/handler");
 
 module.exports.handler = async (event) => {
@@ -14,8 +15,14 @@ module.exports.handler = async (event) => {
   const showTransactions = _.get(queryParams, "transactions") === "true";
   const showAllVaults = _.get(queryParams, "showall") === "true";
   const showStatistics = _.get(queryParams, "statistics") === "true";
+  const showApy = _.get(queryParams, "apy") === "true";
 
   const allVaults = await getVaults();
+
+  /**
+   * By default only show vaults a user has interacted with.
+   * If "showall" query param is true show all vaults.
+   */
   const vaultAddressesForUser = await getVaultAddressesForUser(userAddress);
   let vaults = allVaults;
   if (!showAllVaults) {
@@ -24,48 +31,85 @@ module.exports.handler = async (event) => {
     vaults = _.filter(allVaults, findUserVaults);
   }
 
-  const injectDataIntoVault = (vault, dataToInject, dataKey) => {
-    const findVault = (searchVault) => {
-      return (
-        searchVault.vaultAddress.toLowerCase() === vault.address.toLowerCase()
-      );
-    };
-    const dataForVault = _.clone(_.find(dataToInject, findVault));
-    if (dataForVault) {
-      delete dataForVault.vaultAddress;
+  // Search a vault data set array (statistics, apy) for data relevant to a specific vault
+  const findDataForVault = (data, vault) => {
+    const findVault = (dataEntry) =>
+      dataEntry.vaultAddress.toLowerCase() === vault.address.toLowerCase();
+
+    const foundData = _.clone(_.find(data, findVault));
+    if (foundData) {
+      delete foundData.vaultAddress; // Data will be merged. No longer need this key.
     }
+    return foundData;
+  };
+
+  // Given a vault and a data array, inject data into vault at a specified key
+  const injectDataIntoVaultAtKey = (vault, dataToInject, dataKey) => {
+    if (!dataToInject) {
+      return vault;
+    }
+    const dataForVault = findDataForVault(dataToInject, vault);
     const newVault = vault;
     newVault[dataKey] = dataForVault;
     return newVault;
   };
 
-  // Inject transactions
-  let transactions;
-  if (showTransactions) {
-    transactions = await getTransactions(userAddress);
-  }
-  const injectTransactions = (vault) => {
-    const newVault = injectDataIntoVault(vault, transactions, "transactions");
+  // Merge data into vault. Whitelist fields. If no fields specified, merge all fields.
+  const mergeDataIntoVault = (vault, data, fields) => {
+    const newVault = vault;
+    const dataForVault = findDataForVault(data, vault);
+    let newFields = fields;
+    if (!fields) {
+      newFields = _.keys(dataForVault);
+    }
+    const mergeField = (acc, field) => {
+      acc[field] = dataForVault[field];
+      return acc;
+    };
+    _.reduce(newFields, mergeField, newVault);
     return newVault;
   };
 
-  // Inject statistics
-  let statistics;
-  if (showStatistics) {
-    statistics = await getVaultsStatistics(userAddress);
-  }
+  // Inject APY into vaults
+  const apy = showApy && (await getVaultsApy(userAddress));
+  const injectApy = (vault) => {
+    const fields = [
+      "apyOneWeekSample",
+      "apyInceptionSample",
+      "apyOneMonthSample",
+    ];
+    mergeDataIntoVault(vault, apy, fields);
+    return vault;
+  };
+
+  // Inject statistics into vaults
+  const statistics = showStatistics && (await getVaultsStatistics(userAddress));
   const injectStatistics = (vault) => {
-    const newVault = injectDataIntoVault(vault, statistics, "statistics");
+    mergeDataIntoVault(vault, statistics);
+    return vault;
+  };
+
+  // Inject transactions into vaults at "transactions" key
+  const transactions = showTransactions && (await getTransactions(userAddress));
+  const injectTransactions = (vault) => {
+    const newVault = injectDataIntoVaultAtKey(
+      vault,
+      transactions,
+      "transactions"
+    );
     return newVault;
   };
 
-  const vaultsWithData = _.chain(vaults)
-    .map(injectTransactions)
-    .map(injectStatistics);
-
-  const data = {
-    transactions,
-  };
+  const userHasVaults = _.size(vaults);
+  let vaultsWithData;
+  if (userHasVaults) {
+    vaultsWithData = _.chain(vaults)
+      .map(injectApy)
+      .map(injectStatistics)
+      .map(injectTransactions);
+  } else {
+    vaultsWithData = [];
+  }
   const response = {
     statusCode: 200,
     headers: {
