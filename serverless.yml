@@ -40,6 +40,7 @@ functions:
   vaults:
     handler: services/vaults/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /vaults
@@ -54,6 +55,7 @@ functions:
   vaults-snapshots:
     handler: services/vaults/snapshots/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /vaults/snapshots
@@ -69,6 +71,7 @@ functions:
   vaults-addresses:
     handler: services/vaults/addresses/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /vaults/addresses
@@ -84,11 +87,11 @@ functions:
   vaults-save:
     handler: services/vaults/save/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    timeout: 300
 
   vaults-apy:
     handler: services/vaults/apy/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /vaults/apy
@@ -104,12 +107,12 @@ functions:
   vaults-apy-save:
     handler: services/vaults/apy/save/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-    timeout: 300
 
   # /user
   user-vaults:
     handler: services/user/vaults/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /user/{userAddress}/vaults
@@ -149,6 +152,7 @@ functions:
   user-vaults-transactions:
     handler: services/user/vaults/transactions/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /user/{userAddress}/vaults/transactions
@@ -171,6 +175,7 @@ functions:
   user-vaults-statistics:
     handler: services/user/vaults/statistics/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /user/{userAddress}/vaults/statistics
@@ -193,6 +198,7 @@ functions:
   user-vaults-earnings:
     handler: services/user/vault/earnings/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /user/{userAddress}/vaults/earnings
@@ -210,6 +216,7 @@ functions:
   loanscan-link:
     handler: services/loanscan/link/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /loanscan/link
@@ -225,6 +232,7 @@ functions:
   loanscan-eth-stable:
     handler: services/loanscan/eth-stable/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /loanscan/ethstable
@@ -240,6 +248,7 @@ functions:
   loanscan-ycrv:
     handler: services/loanscan/ycrv/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /loanscan/ycrv
@@ -255,6 +264,7 @@ functions:
   loanscan-crvbtc:
     handler: services/loanscan/crvbtc/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /loanscan/crvbtc
@@ -270,6 +280,7 @@ functions:
   loanscan-crvbusd:
     handler: services/loanscan/crvbusd/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
     events:
       - http:
           path: /loanscan/crvbusd

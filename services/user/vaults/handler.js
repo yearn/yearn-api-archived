@@ -78,14 +78,18 @@ module.exports.handler = async (event) => {
       "apyInceptionSample",
       "apyOneMonthSample",
     ];
-    mergeDataIntoVault(vault, apy, fields);
+    if (apy) {
+      mergeDataIntoVault(vault, apy, fields);
+    }
     return vault;
   };
 
   // Inject statistics into vaults
   const statistics = showStatistics && (await getVaultsStatistics(userAddress));
   const injectStatistics = (vault) => {
-    mergeDataIntoVault(vault, statistics);
+    if (statistics) {
+      mergeDataIntoVault(vault, statistics);
+    }
     return vault;
   };
 
