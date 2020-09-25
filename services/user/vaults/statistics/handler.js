@@ -74,8 +74,7 @@ const getVaultStatistics = async (vaultAddress, transactions, userAddress) => {
     .minus(totalDeposits)
     .plus(totalWithdrawals)
     .minus(totalTransferredIn)
-    .plus(totalTransferredOut)
-    .dividedBy(10 ** 18);
+    .plus(totalTransferredOut);
 
   const statistics = {
     vaultAddress,
@@ -85,7 +84,7 @@ const getVaultStatistics = async (vaultAddress, transactions, userAddress) => {
     totalTransferredOut: totalTransferredOut.toFixed(),
     depositedShares,
     depositedAmount: depositedAmount.toFixed(0),
-    earnings: earnings.toFixed(),
+    earnings: earnings.toFixed(0),
   };
   return statistics;
 };
