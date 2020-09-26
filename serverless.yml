@@ -20,7 +20,7 @@ custom:
   documentation:
     api:
       info:
-        version: "1.01"
+        version: "1.02"
         title: Yearn API
         description: Yearn API
       tags:
@@ -46,11 +46,20 @@ functions:
           path: /vaults
           method: get
           cors: true
+          request:
+            parameters:
+              querystrings:
+                apy: false
           documentation:
             summary: Gets all vaults from the vault registry
             tags:
               - Vaults
             description: Vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0). Includes controller/strategy info. Updates once an hour.
+          queryParams:
+            - name: "apy"
+              description: "Include vault APY"
+              type: "boolean"
+              required: false
 
   vaults-snapshots:
     handler: services/vaults/snapshots/handler.handler
@@ -123,6 +132,7 @@ functions:
               paths:
                 userAddress: true
               querystrings:
+                apy: false
                 statistics: false
                 transactions: false
                 showall: false
@@ -136,6 +146,10 @@ functions:
             - name: "userAddress"
               description: "User account address. Format: 0x{...}"
           queryParams:
+            - name: "apy"
+              description: "Include vault APY"
+              type: "boolean"
+              required: false
             - name: "transactions"
               description: "Include user vault transactions"
               type: "boolean"
