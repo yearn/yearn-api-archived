@@ -1,0 +1,19 @@
+version: '3.6'
+services:
+  serverless:
+    build:
+      context: .
+    environment:
+      - SUBGRAPH_ENDPOINT=${SUBGRAPH_ENDPOINT}
+      - WEB3_ENDPOINT=${WEB3_ENDPOINT}
+      - ARCHIVENODE_ENDPOINT=${ARCHIVENODE_ENDPOINT}
+      - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./config:/opt/app/config:ro"
+      - "./services:/opt/app/services:ro"
+      - "./utils:/opt/app/utils:ro"

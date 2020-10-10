@@ -1,0 +1,6 @@
+.env
+.git
+.gitignore
+*.example
+.idea
+node_modules
