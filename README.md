@@ -15,18 +15,25 @@ https://yearn.tools
 
 ## Setup Instructions
 
-### Clone repoistory
+### Quick start
 
-`git clone https://github.com/yearn-integrations/api.git`
+- Install docker
+- Execute terminal commands
 
-### Configure local environment
+```
+git clone https://github.com/yearn-integrations/yearn-api.git
+cd yearn-api
+cp .env.example .env
+docker-compose up
+```
 
-#### Copy .env file
+- The API should now be running locally on your dev machine
 
-- The ".env" file in the root directory contains various configuration constants utilized by APIs
-- Run the command `cp .env.example .env` to copy .env file template
-- Populate your new .env file with your web3, archive node, and graph endpoints
-- Populate the .env file with your AWS Credentials in order for the docker container to make a connection to S3
+### Optional - Configure environment variables
+
+- .env.example contains sample API keys for various services (Infura/Etherscan). This is done to enable developers to get up to speed quickly. If you are planning on developing APIs that extensively utilize these keys please consider generating new API keys :)
+- Update your .env file to use your own custom web3, archive node, and graph endpoints
+- Update your .env file to use your own custom AWS Credentials
 
 ## Usage Instructions
 
