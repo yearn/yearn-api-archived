@@ -1,4 +1,4 @@
-FROM node:14-buster
+FROM node:12-buster
 
 RUN npm install -g serverless && \
     npm install -g serverless-offline
