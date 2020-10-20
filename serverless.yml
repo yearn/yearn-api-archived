@@ -310,3 +310,37 @@ functions:
               - Loanscan
             description: >
               crvBUSD APY is an aggregate APY. This API combines vault APY with underlying Curve pool APY. Aggregation formula: ((1 + poolApy) * (1 + vaultApy) - 1) * 100;
+
+  # /yearn
+  yearn-repos-save:
+    handler: services/yearn/repos/save/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+
+  yearn-repos:
+    handler: services/yearn/repos/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+    events:
+      - http:
+          path: /yearn/repos
+          method: get
+          cors: true
+          documentation:
+            summary: Gets list of all Yearn repos and contributors
+            tags:
+              - Yearn
+
+  yearn-repos-contributors:
+    handler: services/yearn/repos/contributors/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+    events:
+      - http:
+          path: /yearn/repos/contributors
+          method: get
+          cors: true
+          documentation:
+            summary: Gets list of all Yearn contributors
+            tags:
+              - Yearn
