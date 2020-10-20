@@ -16,7 +16,8 @@ const saveRepo = async (repo) => {
 };
 
 module.exports.handler = async () => {
-  const reposUrl = "https://api.github.com/orgs/iearn-finance/repos";
+  const reposUrl =
+    "https://api.github.com/orgs/iearn-finance/repos?per_page=100";
   let repos = await fetch(reposUrl).then((res) => res.json());
   const fetchContributors = async (url) => {
     const contributors = await fetch(url).then((res) => res.json());
@@ -33,7 +34,12 @@ module.exports.handler = async () => {
     "created_at",
   ];
 
-  const contributorFields = ["login", "avatar_url", "html_url"];
+  const contributorFields = [
+    "login",
+    "avatar_url",
+    "html_url",
+    "contributions",
+  ];
 
   const filterContributors = (contributor) =>
     _.pick(contributor, contributorFields);

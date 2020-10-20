@@ -316,6 +316,15 @@ functions:
     handler: services/yearn/repos/save/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
+    events:
+      - http:
+          path: /yearn/repos/save
+          method: get
+          cors: true
+          documentation:
+            summary: Save repos and contributors. Can only be called once per hour
+            tags:
+              - Yearn
 
   yearn-repos:
     handler: services/yearn/repos/handler.handler
