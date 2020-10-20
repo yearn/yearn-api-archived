@@ -13,13 +13,14 @@ const getRepos = async () => {
 
 exports.handler = async (event) => {
   const repos = await getRepos();
+  const orderedRepos = _.orderBy(repos, "pushed_at", "desc");
   const response = {
     statusCode: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: JSON.stringify(repos),
+    body: JSON.stringify(orderedRepos),
   };
   return response;
 };

@@ -30,6 +30,8 @@ custom:
           description: User endpoints (these APIs are specific to a user account)
         - name: Loanscan
           description: Loanscan endpoints (not for general consumption)
+        - name: Yearn
+          description: Yearn organization endpoints
 
 provider:
   name: aws
