@@ -36,7 +36,7 @@ exports.handler = async (event) => {
 
   const contributors = _.map(contributorMap);
 
-  const orderedContributions = _.orderBy(contributors, "contributions", "desc");
+  // const orderedContributions = _.orderBy(contributors, "contributions", "desc");
 
   const response = {
     statusCode: 200,
@@ -44,7 +44,7 @@ exports.handler = async (event) => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: JSON.stringify(orderedContributions),
+    body: JSON.stringify(contributors),
   };
   return response;
 };
