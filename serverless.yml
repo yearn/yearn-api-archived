@@ -340,6 +340,20 @@ functions:
             tags:
               - Yearn
 
+  yearn-repos-statistics:
+    handler: services/yearn/repos/statistics/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+    events:
+      - http:
+          path: /yearn/repos/statistics
+          method: get
+          cors: true
+          documentation:
+            summary: Gets basic Yearn repo statistics
+            tags:
+              - Yearn
+
   yearn-repos-contributors:
     handler: services/yearn/repos/contributors/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2

@@ -35,7 +35,19 @@ exports.handler = async (event) => {
 
   const contributors = _.map(contributorMap);
 
-  // const orderedContributions = _.orderBy(contributors, "contributions", "desc");
+  const aggregateContributionCount = (acc, contributor) => {
+    acc += contributor.contributions;
+    return acc;
+  };
+  const contributionCount = _.reduce(
+    contributors,
+    aggregateContributionCount,
+    0
+  );
+
+  const contributorCount = _.size(contributors);
+
+  const repoCount = _.size(repos);
 
   const response = {
     statusCode: 200,
@@ -43,7 +55,7 @@ exports.handler = async (event) => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: JSON.stringify(contributors),
+    body: JSON.stringify({ repoCount, contributionCount, contributorCount }),
   };
   return response;
 };
