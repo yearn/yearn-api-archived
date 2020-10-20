@@ -115,7 +115,7 @@ module.exports.handler = async (event) => {
 		const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
 		const vaultAlias =
 			vaultAliases[vaultAddress] || `${tokenSymbolAlias} Vault`;
-		const tokenIcon = tokenInfo.image.large;
+		const tokenIcon = _.get(tokenInfo, 'image.large')
 		const vaultIcon = vaultIcons[tokenSymbol];
 		const vault = {
 			address: vaultAddress,
