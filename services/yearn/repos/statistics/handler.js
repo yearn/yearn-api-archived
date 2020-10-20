@@ -39,11 +39,7 @@ exports.handler = async (event) => {
     acc += contributor.contributions;
     return acc;
   };
-  const contributionCount = _.reduce(
-    contributors,
-    aggregateContributionCount,
-    0
-  );
+  const commitCount = _.reduce(contributors, aggregateContributionCount, 0);
 
   const contributorCount = _.size(contributors);
 
@@ -55,7 +51,7 @@ exports.handler = async (event) => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: JSON.stringify({ repoCount, contributionCount, contributorCount }),
+    body: JSON.stringify({ repoCount, commitCount, contributorCount }),
   };
   return response;
 };
