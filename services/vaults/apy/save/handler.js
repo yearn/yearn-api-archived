@@ -9,6 +9,7 @@ const vaults = require("./vaults");
 const EthDater = require("./ethereum-block-by-date.js");
 const { delayTime } = require("./config");
 const poolABI = require("./abis/pool");
+const {getBoost} = require('./getBoost');
 const archiveNodeUrl = process.env.ARCHIVENODE_ENDPOINT;
 const infuraUrl = process.env.WEB3_ENDPOINT;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);
@@ -261,6 +262,7 @@ const readVault = async (vault) => {
   }
   const contract = new infuraWeb3.eth.Contract(abi, address);
   const apy = await getApyForVault(vault);
+  const boost = await getBoost(vault);
   const loanscanApy = await getLoanscanApyForVault(vault);
   console.log("Vault: ", name, apy);
   const data = {
@@ -269,10 +271,10 @@ const readVault = async (vault) => {
     symbol,
     description,
     vaultSymbol,
-    description,
     tokenAddress,
     timestamp: Date.now(),
     ...apy,
+    boost,
   };
   await saveVault(data);
   return data;
