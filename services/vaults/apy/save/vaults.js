@@ -189,7 +189,7 @@ module.exports = [
     id: "USDC",
     name: "USD Coin",
     symbol: "USDC",
-    description: "USD//C",
+    description: "USD Coin",
     vaultSymbol: "yUSDC",
     erc20address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     vaultContractAddress: "0x597aD1e0c13Bfe8025993D9e79C69E1c0233522e",
