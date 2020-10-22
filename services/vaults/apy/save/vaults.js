@@ -111,7 +111,7 @@ module.exports = [
     description: "yDAI/yUSDC/yUSDT/yBUSD",
     vaultSymbol: "ycrvBUSD",
     erc20address: "0x3B3Ac5386837Dc563660FB6a0937DFAa5924333B",
-    vaultContractAddress: "0x2994529c0652d127b7842094103715ec5299bbed",
+    vaultContractAddress: "0x2994529C0652D127b7842094103715ec5299bBed",
     vaultContractABI: config.vaultContractV3ABI,
     balance: 0,
     vaultBalance: 0,
