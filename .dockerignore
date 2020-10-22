@@ -4,3 +4,4 @@
 *.example
 .idea
 node_modules
+.github
