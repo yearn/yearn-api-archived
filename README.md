@@ -18,12 +18,23 @@ https://yearn.tools
 ### Quick start
 
 - Install docker
-- Execute terminal commands
+- Clone repo
 
 ```
 git clone https://github.com/yearn-integrations/yearn-api.git
+```
+
+- Copy the example .env file
+
+```
 cd yearn-api
 cp .env.example .env
+```
+
+- Populate .env with your AWS credentials (ask x48 for credentials)
+- Start the docker container
+
+```
 docker-compose up
 ```
 
