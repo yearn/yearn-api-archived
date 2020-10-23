@@ -1,5 +1,5 @@
-const AWS = require("aws-sdk");
-const db = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
+const dynamodb = require('../../../../utils/dynamodb')
+const db = dynamodb.doc;
 const _ = require("lodash");
 
 const getRepos = async () => {

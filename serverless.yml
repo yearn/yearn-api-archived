@@ -1,6 +1,7 @@
 service: yearn
 
 plugins:
+  - serverless-dynamodb-local
   - serverless-offline
   - serverless-domain-manager
   - serverless-export-swagger
@@ -32,6 +33,16 @@ custom:
           description: Loanscan endpoints (not for general consumption)
         - name: Yearn
           description: Yearn organization endpoints
+  dynamodb:
+    stages:
+      - local
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+
+resources:
+  - ${file(./sls-resources/resource.${opt:stage, self:provider.stage}.yml), ''}
 
 provider:
   name: aws
