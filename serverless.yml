@@ -140,21 +140,20 @@ functions:
           method: get
 
   vaults-holdings:
-  handler: services/vaults/holdings/handler.handler
-  role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
-  timeout: 30
-  events:
-    - http:
-        path: /vaults/holdings
-        method: get
-        cors: true
-        documentation:
-          summary: Gets holdings for all vaults
-          tags:
-            - Vaults
-          description: >
-            Vault holdings is calculated based on strategy + vault holdings per vault. TLV is calculated using USD value of vault's underlying token through coingecko
-
+    handler: services/vaults/holdings/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+    events:
+      - http:
+          path: /vaults/holdings
+          method: get
+          cors: true
+          documentation:
+            summary: Gets holdings for all vaults
+            tags:
+              - Vaults
+            description: >
+              Vault holdings is calculated based on strategy + vault holdings per vault. TLV is calculated using USD value of vault's underlying token through coingecko
   # /user
   user-vaults:
     handler: services/user/vaults/handler.handler

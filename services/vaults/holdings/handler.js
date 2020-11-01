@@ -22,7 +22,7 @@ exports.getVaultsApy = getVaultsApy;
 exports.handler = async (event) => {
   const apy = await getVaultsApy();
   const response = {
-    statusCode: 404,
+    statusCode: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,

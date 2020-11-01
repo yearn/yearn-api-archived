@@ -9,23 +9,16 @@ const vaults = require("./vaults");
 const EthDater = require("./ethereum-block-by-date.js");
 const { delayTime } = require("./config");
 const poolABI = require("./abis/pool");
-const {getBoost} = require('./getBoost');
+const {getHoldings} = require('./getHoldings');
 const archiveNodeUrl = process.env.ARCHIVENODE_ENDPOINT;
 const infuraUrl = process.env.WEB3_ENDPOINT;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);
 const infuraWeb3 = new Web3(infuraUrl);
 const blocks = new EthDater(archiveNodeWeb3, delayTime);
 
-let currentBlockNbr;
-let oneDayAgoBlock;
-let threeDaysAgoBlock;
-let oneWeekAgoBlock;
-let oneMonthAgoBlock;
-let nbrBlocksInDay;
-const oneDayAgo = moment().subtract(1, "days").valueOf();
-const threeDaysAgo = moment().subtract(3, "days").valueOf();
-const oneWeekAgo = moment().subtract(1, "weeks").valueOf();
-const oneMonthAgo = moment().subtract(1, "months").valueOf();
+AWS.config.update({
+  endpoint: "http://localhost:8000"
+});
 
 const pools = [
   {
@@ -54,196 +47,9 @@ const saveVault = async (data) => {
   console.log(`Saved ${data.name}`);
 };
 
-const getApy = async (
-  previousValue,
-  currentValue,
-  previousBlockNbr,
-  currentBlockNbr
-) => {
-  if (!previousValue) {
-    return 0;
-  }
-  const pricePerFullShareDelta = (currentValue - previousValue) / 1e18;
-  const blockDelta = currentBlockNbr - previousBlockNbr;
-  const dailyRoi = (pricePerFullShareDelta / blockDelta) * 100 * nbrBlocksInDay;
-  const yearlyRoi = dailyRoi * 365;
-  return yearlyRoi;
-};
 
-const getVirtualPrice = async (address, block) => {
-  const poolContract = new archiveNodeWeb3.eth.Contract(poolABI, address);
-  const virtualPrice = await poolContract.methods
-    .get_virtual_price()
-    .call(undefined, block);
-  await delay(delayTime);
-  return virtualPrice;
-};
-
-const getPricePerFullShare = async (
-  vaultContract,
-  block,
-  inceptionBlockNbr
-) => {
-  const contractDidntExist = block < inceptionBlockNbr;
-  const inceptionBlock = block === inceptionBlockNbr;
-  if (inceptionBlock) {
-    return 1e18;
-  }
-  if (contractDidntExist) {
-    return 0;
-  }
-  const pricePerFullShare = await vaultContract.methods
-    .getPricePerFullShare()
-    .call(undefined, block);
-  await delay(delayTime);
-  return pricePerFullShare;
-};
-
-const getApyForVault = async (vault) => {
-  const {
-    lastMeasurement: inceptionBlockNbr,
-    vaultContractABI: abi,
-    vaultContractAddress: address,
-    symbol,
-  } = vault;
-
-  const pool = _.find(pools, { symbol });
 
   const vaultContract = new archiveNodeWeb3.eth.Contract(abi, address);
-
-  const pricePerFullShareInception = await getPricePerFullShare(
-    vaultContract,
-    inceptionBlockNbr,
-    inceptionBlockNbr
-  );
-
-  const pricePerFullShareCurrent = await getPricePerFullShare(
-    vaultContract,
-    currentBlockNbr,
-    inceptionBlockNbr
-  );
-
-  const pricePerFullShareOneDayAgo = await getPricePerFullShare(
-    vaultContract,
-    oneDayAgoBlock,
-    inceptionBlockNbr
-  );
-
-  const pricePerFullShareThreeDaysAgo = await getPricePerFullShare(
-    vaultContract,
-    threeDaysAgoBlock,
-    inceptionBlockNbr
-  );
-
-  const pricePerFullShareOneWeekAgo = await getPricePerFullShare(
-    vaultContract,
-    oneWeekAgoBlock,
-    inceptionBlockNbr
-  );
-
-  const pricePerFullShareOneMonthAgo = await getPricePerFullShare(
-    vaultContract,
-    oneMonthAgoBlock,
-    inceptionBlockNbr
-  );
-
-  const now = Date.now();
-
-  const apyInceptionSample = await getApy(
-    pricePerFullShareInception,
-    pricePerFullShareCurrent,
-    inceptionBlockNbr,
-    currentBlockNbr
-  );
-
-  const apyOneDaySample =
-    (await getApy(
-      pricePerFullShareOneDayAgo,
-      pricePerFullShareCurrent,
-      oneDayAgoBlock,
-      currentBlockNbr
-    )) || apyInceptionSample;
-
-  const apyThreeDaySample =
-    (await getApy(
-      pricePerFullShareThreeDaysAgo,
-      pricePerFullShareCurrent,
-      threeDaysAgoBlock,
-      currentBlockNbr
-    )) || apyInceptionSample;
-
-  const apyOneWeekSample =
-    (await getApy(
-      pricePerFullShareOneWeekAgo,
-      pricePerFullShareCurrent,
-      oneWeekAgoBlock,
-      currentBlockNbr
-    )) || apyInceptionSample;
-
-  const apyOneMonthSample =
-    (await getApy(
-      pricePerFullShareOneMonthAgo,
-      pricePerFullShareCurrent,
-      oneMonthAgoBlock,
-      currentBlockNbr
-    )) || apyInceptionSample;
-
-  let apyLoanscan = apyOneDaySample;
-
-  const apyData = {
-    apyInceptionSample,
-    apyOneDaySample,
-    apyThreeDaySample,
-    apyOneWeekSample,
-    apyOneMonthSample,
-  };
-
-  if (pool) {
-    const poolAddress = pool.address;
-    const virtualPriceCurrent = await getVirtualPrice(
-      poolAddress,
-      currentBlockNbr
-    );
-    const virtualPriceOneDayAgo = await getVirtualPrice(
-      poolAddress,
-      oneDayAgoBlock
-    );
-
-    const poolApy = await getApy(
-      virtualPriceOneDayAgo,
-      virtualPriceCurrent,
-      oneDayAgoBlock,
-      currentBlockNbr
-    );
-
-    const poolPct = poolApy / 100;
-    const vaultPct = apyOneDaySample / 100;
-    apyLoanscan = ((1 + poolPct) * (1 + vaultPct) - 1) * 100;
-
-    return { ...apyData, poolApy, apyLoanscan };
-  }
-
-  return {
-    ...apyData,
-    apyLoanscan,
-  };
-};
-
-const getLoanscanApyForVault = async (vault) => {
-  const {
-    lastMeasurement: inceptionBlockNbr,
-    vaultContractABI: abi,
-    vaultContractAddress: address,
-  } = vault;
-
-  const vaultContract = new archiveNodeWeb3.eth.Contract(abi, address);
-
-  const pricePerFullShareInception = await getPricePerFullShare(
-    vaultContract,
-    inceptionBlockNbr,
-    inceptionBlockNbr
-  );
-};
 
 const readVault = async (vault) => {
   const {
@@ -260,21 +66,16 @@ const readVault = async (vault) => {
     console.log(`Vault ABI not found: ${name}`);
     return null;
   }
-  const contract = new infuraWeb3.eth.Contract(abi, address);
-  const apy = await getApyForVault(vault);
-  const boost = await getBoost(vault);
-  const loanscanApy = await getLoanscanApyForVault(vault);
+  const strategyHoldings= await getHoldings(vault);
+ 
   console.log("Vault: ", name, apy);
   const data = {
     address,
     name,
     symbol,
-    description,
-    vaultSymbol,
-    tokenAddress,
     timestamp: Date.now(),
-    ...apy,
-    boost,
+    vaultHoldings,
+    strategyHoldings,
   };
   await saveVault(data);
   return data;
