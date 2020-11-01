@@ -26,3 +26,10 @@ module.exports.dev = () => {
     domainName: `dev-${DEFAULT.domainName}`,
   });
 };
+
+module.exports.local = () => {
+  return _.merge({}, DEFAULT, {
+    domainName: `local-${DEFAULT.domainName}`,
+  });
+};
+
