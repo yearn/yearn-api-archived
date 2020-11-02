@@ -22,10 +22,11 @@
 
 // Note: File contents copied and modified from serverless-dynamodb-client (https://github.com/99x/serverless-dynamodb-client)
 const AWS = require('aws-sdk');
+require("dotenv").config();
 
 const options = {
     apiVersion: "2012-08-10",
-    region: "localhost",
+    region: process.env.AWS_DEFAULT_REGION,
     endpoint: "http://localhost:8000"
 };
 

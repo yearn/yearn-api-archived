@@ -1,5 +1,5 @@
 require("dotenv").config();
-const dynamodb = require('../../../../utils/dynamodb')
+const dynamodb = require('../../../utils/dynamoDb')
 const db = dynamodb.doc;
 const Web3 = require("web3");
 const moment = require("moment");

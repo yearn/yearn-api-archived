@@ -15,6 +15,6 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - "./config:/opt/app/config:ro"
-      - "./services:/opt/app/services:ro"
-      - "./utils:/opt/app/utils:ro"
+      - "./config:/opt/app/config:rw"
+      - "./services:/opt/app/services:rw"
+      - "./utils:/opt/app/utils:rw"
