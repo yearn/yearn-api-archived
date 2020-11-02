@@ -20,4 +20,7 @@ COPY . .
 EXPOSE 3000
 
 RUN sls dynamodb install
+
+RUN chmod 777 ./startserverless.sh
+
 ENTRYPOINT ./startserverless.sh
