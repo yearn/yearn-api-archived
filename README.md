@@ -25,14 +25,14 @@ git clone https://github.com/yearn-integrations/yearn-api.git
 ```
 
 - Pick an example environment file to use:
-  - .env.local - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
-  - .env.dev - uses dynamodb in AWS with credentials (use your own or ask x48 for read-only keys)
+  - .sample.env.local - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
+  - .sample.env.dev - uses dynamodb in AWS with credentials (use your own or ask x48 for read-only keys)
 
 - Copy the example .env file
 
 ```
 cd yearn-api
-cp .env.local .env
+cp .sample.env.local .env
 ```
 
 - Start the docker container
@@ -45,9 +45,9 @@ docker-compose up
 
 ### Optional - Configure environment variables
 
-- .env.local and .env.dev contain sample API keys for various services (Infura/Etherscan). This is done to enable developers to get up to speed quickly. If you are planning on developing APIs that extensively utilize these keys please consider generating new API keys :)
+- .sample.env.local and .sample.env.dev contain sample API keys for various services (Infura/Etherscan). This is done to enable developers to get up to speed quickly. If you are planning on developing APIs that extensively utilize these keys please consider generating new API keys :)
 - Update your .env file to use your own custom web3, archive node, and graph endpoints
-- Update your .env file to use your own custom AWS Credentials (if using .env.dev and not .env.local)
+- Update your .env file to use your own custom AWS Credentials (if using .sample.env.dev and not .sample.sample.env.local)
 
 ## Usage Instructions
 
