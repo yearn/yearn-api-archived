@@ -1,4 +1,4 @@
-const dynamodb = require('../../../utils/dynamodb')
+const dynamodb = require("../../../utils/dynamoDb")
 const db = dynamodb.doc;
 const _ = require("lodash");
 
