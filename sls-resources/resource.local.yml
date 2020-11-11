@@ -1,0 +1,37 @@
+Resources:
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: vaultApy
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: address
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: address
+          AttributeType: S
+  DynamoDBTable2:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: vaults
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: address
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: address
+          AttributeType: S
+  DynamoDBTable3:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: repos
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: name
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: name
+          AttributeType: S

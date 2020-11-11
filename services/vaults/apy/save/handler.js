@@ -1,6 +1,6 @@
 require("dotenv").config();
-const AWS = require("aws-sdk");
-const db = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
+const dynamodb = require('../../../../utils/dynamoDb')
+const db = dynamodb.doc;
 const Web3 = require("web3");
 const moment = require("moment");
 const delay = require("delay");
