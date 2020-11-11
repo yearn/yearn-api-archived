@@ -2,7 +2,9 @@
   "eslintConfig": {
     "extends": "@serverless/eslint-config/node",
     "root": true,
-    "no-console": 0
+    "rules": {
+      "no-console": 0
+    }
   },
   "scripts": {
     "lint": "eslint  --ignore-path .gitignore .",
