@@ -1,3 +1,5 @@
+'use strict';
+
 // Until we have vault registry, hardcoding vault metadata to save many contract queries on every call.
 const vaultsConfig = [
   {

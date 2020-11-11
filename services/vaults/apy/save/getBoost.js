@@ -1,13 +1,16 @@
+'use strict';
+
 const Web3 = require('web3');
-const web3 = new Web3(process.env.WEB3_ENDPOINT);
-const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
 const yRegistryAbi = require('../../abis/yRegistry');
 const strategyMinABI = require('./abis/strategyMinABI');
 const gaugeABI = require('./abis/gauge');
 const votingEscrowABI = require('./abis/votingEscrow');
 const _ = require('lodash');
 
-let vaultStrategyMap = {};
+const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
+const web3 = new Web3(process.env.WEB3_ENDPOINT);
+
+const vaultStrategyMap = {};
 const votingEscrowAddress = '0x5f3b5DfEb7B28CDbD7FAba78963EE202a494e2A2';
 const votingEscrowContract = new web3.eth.Contract(
   votingEscrowABI,
@@ -26,7 +29,7 @@ const getVaultsStrategy = async (vault) => {
     const vaultsInfo = await registryContract.methods.getVaultsInfo().call();
 
     vaultAddresses.forEach((address, index) => {
-      vaultStrategyMap[address] = vaultsInfo['strategyArray'][index];
+      vaultStrategyMap[address] = vaultsInfo.strategyArray[index];
     });
   }
 
@@ -79,14 +82,14 @@ module.exports.getBoost = async (vault) => {
   const maxBoostPossible = lim / _workingSupply / (noboostLim / noboostSupply);
 
   return {
-    gaugeBalance: gaugeBalance,
-    gaugeTotal: gaugeTotal,
-    vecrvBalance: vecrvBalance,
-    vecrvTotal: vecrvTotal,
-    workingBalance: workingBalance,
+    gaugeBalance,
+    gaugeTotal,
+    vecrvBalance,
+    vecrvTotal,
+    workingBalance,
     workingTotal: workingSupply,
-    boost: boost,
+    boost,
     maxBoost: maxBoostPossible,
-    minVecrv: minVecrv,
+    minVecrv,
   };
 };

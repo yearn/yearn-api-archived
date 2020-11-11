@@ -1,3 +1,5 @@
+'use strict';
+
 const vaultContractABI = require('./abis/vaultV1');
 const vaultContractV2ABI = require('./abis/vaultV2');
 const vaultContractV3ABI = require('./abis/vaultV3');

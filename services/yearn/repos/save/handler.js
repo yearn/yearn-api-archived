@@ -1,8 +1,11 @@
+'use strict';
+
 require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
-const db = dynamodb.doc;
 const _ = require('lodash');
 const fetch = require('node-fetch');
+
+const db = dynamodb.doc;
 
 const saveRepo = async (repo) => {
   const params = {
@@ -18,7 +21,7 @@ const saveRepo = async (repo) => {
 module.exports.handler = async () => {
   const reposUrl =
     'https://api.github.com/orgs/iearn-finance/repos?per_page=100';
-  let repos = await fetch(reposUrl).then((res) => res.json());
+  const repos = await fetch(reposUrl).then((res) => res.json());
   const fetchContributors = async (url) => {
     const contributors = await fetch(url).then((res) => res.json());
     return contributors;

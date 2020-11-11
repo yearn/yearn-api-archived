@@ -1,8 +1,11 @@
+'use strict';
+
 const dynamodb = require('../../utils/dynamoDb');
-const db = dynamodb.doc;
 const _ = require('lodash');
 const { injectDataIntoVaultAtKey } = require('../../utils/vaults');
 const { getVaultsApy } = require('../vaults/apy/handler');
+
+const db = dynamodb.doc;
 
 const getVaults = async () => {
   const params = {

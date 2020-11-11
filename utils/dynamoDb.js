@@ -21,6 +21,9 @@
 // SOFTWARE.
 
 // Note: File contents copied and modified from serverless-dynamodb-client (https://github.com/99x/serverless-dynamodb-client)
+
+'use strict';
+
 const AWS = require('aws-sdk');
 
 const options = {
@@ -31,7 +34,7 @@ const options = {
 
 const isOfflineLocalhost = function () {
   // Depends on serverless-offline plugion which adds IS_OFFLINE to process.env when running offline
-  return process.env.IS_OFFLINE && process.env.SERVERLESS_STAGE == 'local';
+  return process.env.IS_OFFLINE && process.env.SERVERLESS_STAGE === 'local';
 };
 
 const dynamodb = {

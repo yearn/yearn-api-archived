@@ -3,10 +3,10 @@
 require('dotenv').config();
 const fetch = require('node-fetch');
 const { pluck, uniq } = require('ramda/dist/ramda');
-const BigNumber = require('bignumber.js');
-const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
 const { getVaults } = require('../../../vaults/handler');
 const _ = require('lodash');
+
+const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
 
 module.exports.handler = async (event) => {
   const userAddress = event.pathParameters.userAddress;
@@ -96,7 +96,8 @@ const getVaultAddressesForUser = async (userAddress) => {
 
 const getTransactions = async (userAddress) => {
   const graphTransactions = await getGraphTransactions(userAddress);
-  let { deposits, withdrawals, transfersIn, transfersOut } = graphTransactions;
+  const { deposits, withdrawals } = graphTransactions;
+  let { transfersIn, transfersOut } = graphTransactions;
 
   const injectAmountIntoTransfer = (transfer) => {
     const amount = (transfer.balance * transfer.shares) / transfer.totalSupply;

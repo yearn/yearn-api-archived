@@ -4,11 +4,12 @@ require('dotenv').config();
 const vaultsConfig = require('./vaults');
 const fetch = require('node-fetch');
 const { pluck, uniq } = require('ramda/dist/ramda');
+const _ = require('lodash');
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
+
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-const _ = require('lodash');
 
 module.exports.handler = async (event) => {
   const userAddress = event.pathParameters.userAddress;
@@ -131,7 +132,7 @@ async function buildEarningsPerVaultData(address, activityData) {
   // Assemble data into final format including vault metadata, holdings, earned, deposits, withdrawals and transfers.
   // This essentially collates the data per vault, adds totals and removes fields needed up unti now, but that we
   // don't want to return to the API user.
-  let earningsByVault = vaultAddresses.map((vaultAddress) => {
+  const earningsByVault = vaultAddresses.map((vaultAddress) => {
     const depositsToVault = allDeposits
       .filter((deposit) => deposit.vaultAddress === vaultAddress)
       .map((deposit) => _.omit(deposit, 'vaultAddress'));
@@ -173,16 +174,16 @@ async function buildEarningsPerVaultData(address, activityData) {
       transfersOutOfVault,
     );
 
-    let vaultMetadata = vaultsConfig.find(
+    const vaultMetadata = vaultsConfig.find(
       (vaultConfig) =>
         vaultConfig.address.toLowerCase() === vaultAddress.toLowerCase(),
     );
 
-    let holdingsInVault = allHoldings.find(
+    const holdingsInVault = allHoldings.find(
       (holding) => holding.vaultAddress === vaultAddress,
     ).holdings;
 
-    let vaultEarnings = {
+    const vaultEarnings = {
       vault: vaultMetadata,
       earned: holdingsInVault
         .minus(totalDepositedToVault)
@@ -249,7 +250,7 @@ function convertFieldsToBigNumber(entities, fields) {
 
 async function getHoldingsData(address, vaultAddresses) {
   // Create and call to vault contracts got get user balances and pricePerFullShares.
-  let vaultContracts = {};
+  const vaultContracts = {};
   for (const vaultAddress of vaultAddresses) {
     vaultContracts[vaultAddress] = new web3.eth.Contract(
       getMinimalVaultABI(),

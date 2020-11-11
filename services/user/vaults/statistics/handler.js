@@ -1,11 +1,9 @@
 'use strict';
 
 require('dotenv').config();
-const fetch = require('node-fetch');
-const { pluck, uniq } = require('ramda/dist/ramda');
 const BigNumber = require('bignumber.js');
-const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
 const Web3 = require('web3');
+
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 
 const {

@@ -1,14 +1,17 @@
-require('dotenv').config();
-const dynamodb = require('../../../utils/dynamoDb');
+'use strict';
+
 const db = dynamodb.doc;
+require('dotenv').config();
 const _ = require('lodash');
+const dynamodb = require('../../../utils/dynamoDb');
 const fetch = require('node-fetch');
 const Web3 = require('web3');
+const yRegistryAbi = require('../abis/yRegistry');
+const delay = require('delay');
+
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
-const yRegistryAbi = require('../abis/yRegistry');
 const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
-const delay = require('delay');
 const delayTime = 500;
 
 const tokenSymbolAliases = {
@@ -66,6 +69,7 @@ const callContractMethod = async (contract, method) => {
     return result;
   } catch (err) {
     console.log('err', method);
+    return null;
   }
 };
 
@@ -81,7 +85,7 @@ const saveVault = async (vault) => {
   console.log(`Saved ${vault.name}`);
 };
 
-module.exports.handler = async (event) => {
+module.exports.handler = async () => {
   const registryContract = new web3.eth.Contract(
     yRegistryAbi,
     yRegistryAddress,
@@ -96,8 +100,8 @@ module.exports.handler = async (event) => {
     const controllerAddress = vaultInfo.controllerArray[idx];
     const strategyAddress = vaultInfo.strategyArray[idx];
     const vaultContract = await getContract(vaultAddress);
-    const controllerContract = await getContract(controllerAddress);
-    const strategyContract = await getContract(strategyAddress);
+    // const controllerContract = await getContract(controllerAddress);
+    // const strategyContract = await getContract(strategyAddress);
     const vaultName = await callContractMethod(vaultContract, 'name');
     const vaultSymbol = await callContractMethod(vaultContract, 'symbol');
     const tokenSymbol = vaultSymbol.substring(1);
@@ -124,16 +128,16 @@ module.exports.handler = async (event) => {
       vaultIcon,
       symbol: vaultSymbol,
       symbolAlias,
-      controllerAddress: controllerAddress,
+      controllerAddress,
       controllerName: await fetchContractName(controllerAddress),
-      strategyAddress: strategyAddress,
+      strategyAddress,
       strategyName: await fetchContractName(strategyAddress),
-      tokenAddress: tokenAddress,
-      tokenName: tokenName,
-      tokenSymbol: tokenSymbol,
+      tokenAddress,
+      tokenName,
+      tokenSymbol,
       tokenSymbolAlias,
-      tokenIcon: tokenIcon,
-      decimals: decimals,
+      tokenIcon,
+      decimals,
       wrapped: vaultInfo.isWrappedArray[idx],
       delegated: vaultInfo.isDelegatedArray[idx],
       timestamp: Date.now(),

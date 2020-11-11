@@ -1,6 +1,9 @@
+'use strict';
+
 const dynamodb = require('../../../../utils/dynamoDb');
-const db = dynamodb.doc;
 const _ = require('lodash');
+
+const db = dynamodb.doc;
 
 const getRepos = async () => {
   const params = {
@@ -11,18 +14,18 @@ const getRepos = async () => {
   return repos;
 };
 
-exports.handler = async (event) => {
+exports.handler = async () => {
   const repos = await getRepos();
-  let contributorMap = {};
+  const contributorMap = {};
 
-  let contributorEntries = _.union(
+  const contributorEntries = _.union(
     ..._.map(repos, (repo) => repo.contributors),
   );
 
   const updateContributor = (contributor) => {
     const { login } = contributor;
     let { contributions = 0 } = contributor;
-    let foundContributor = contributorMap[login];
+    const foundContributor = contributorMap[login];
     if (foundContributor) {
       const { contributions: previousContributions } = foundContributor;
       contributions += previousContributions;

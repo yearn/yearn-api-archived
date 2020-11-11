@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const { getVaults } = require('../handler');
 
-module.exports.handler = async (event) => {
+module.exports.handler = async () => {
   const vaults = await getVaults();
   const addresses = _.map(vaults, 'address');
   return {

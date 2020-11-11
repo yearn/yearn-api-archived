@@ -1,6 +1,7 @@
+'use strict';
+
 require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
-const db = dynamodb.doc;
 const Web3 = require('web3');
 const moment = require('moment');
 const delay = require('delay');
@@ -10,6 +11,8 @@ const EthDater = require('./ethereum-block-by-date.js');
 const { delayTime } = require('./config');
 const poolABI = require('./abis/pool');
 const { getBoost } = require('./getBoost');
+
+const db = dynamodb.doc;
 const archiveNodeUrl = process.env.ARCHIVENODE_ENDPOINT;
 const infuraUrl = process.env.WEB3_ENDPOINT;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);
@@ -54,12 +57,7 @@ const saveVault = async (data) => {
   console.log(`Saved ${data.name}`);
 };
 
-const getApy = async (
-  previousValue,
-  currentValue,
-  previousBlockNbr,
-  currentBlockNbr,
-) => {
+const getApy = async (previousValue, currentValue, previousBlockNbr) => {
   if (!previousValue) {
     return 0;
   }
@@ -147,8 +145,6 @@ const getApyForVault = async (vault) => {
     inceptionBlockNbr,
   );
 
-  const now = Date.now();
-
   const apyInceptionSample = await getApy(
     pricePerFullShareInception,
     pricePerFullShareCurrent,
@@ -229,21 +225,21 @@ const getApyForVault = async (vault) => {
   };
 };
 
-const getLoanscanApyForVault = async (vault) => {
-  const {
-    lastMeasurement: inceptionBlockNbr,
-    vaultContractABI: abi,
-    vaultContractAddress: address,
-  } = vault;
+// const getLoanscanApyForVault = async (vault) => {
+//   const {
+//     lastMeasurement: inceptionBlockNbr,
+//     vaultContractABI: abi,
+//     vaultContractAddress: address,
+//   } = vault;
 
-  const vaultContract = new archiveNodeWeb3.eth.Contract(abi, address);
+//   const vaultContract = new archiveNodeWeb3.eth.Contract(abi, address);
 
-  const pricePerFullShareInception = await getPricePerFullShare(
-    vaultContract,
-    inceptionBlockNbr,
-    inceptionBlockNbr,
-  );
-};
+//   const pricePerFullShareInception = await getPricePerFullShare(
+//     vaultContract,
+//     inceptionBlockNbr,
+//     inceptionBlockNbr,
+//   );
+// };
 
 const readVault = async (vault) => {
   const {
@@ -260,10 +256,10 @@ const readVault = async (vault) => {
     console.log(`Vault ABI not found: ${name}`);
     return null;
   }
-  const contract = new infuraWeb3.eth.Contract(abi, address);
+  // const contract = new infuraWeb3.eth.Contract(abi, address);
   const apy = await getApyForVault(vault);
   const boost = await getBoost(vault);
-  const loanscanApy = await getLoanscanApyForVault(vault);
+  // const loanscanApy = await getLoanscanApyForVault(vault);
   console.log('Vault: ', name, apy);
   const data = {
     address,
@@ -280,7 +276,7 @@ const readVault = async (vault) => {
   return data;
 };
 
-module.exports.handler = async (context) => {
+module.exports.handler = async () => {
   console.log('Fetching historical blocks');
   currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
   await delay(delayTime);

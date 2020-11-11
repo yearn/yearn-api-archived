@@ -1,6 +1,9 @@
+'use strict';
+
 const dynamodb = require('../../../utils/dynamoDb');
+// const _ = require('lodash');
+
 const db = dynamodb.doc;
-const _ = require('lodash');
 
 const getVaultsApy = async () => {
   const params = {
@@ -9,17 +12,17 @@ const getVaultsApy = async () => {
   const entries = await db.scan(params).promise();
   const apy = entries.Items;
 
-  const injectVaultAddress = (vault) => {
-    vault.vaultAddress = vault.address;
-    return vault;
-  };
-  const vaultAddress = _.map(apy, injectVaultAddress);
+  // const injectVaultAddress = (vault) => {
+  //   vault.vaultAddress = vault.address;
+  //   return vault;
+  // };
+  // const vaultAddress = _.map(apy, injectVaultAddress);
   return apy;
 };
 
 exports.getVaultsApy = getVaultsApy;
 
-exports.handler = async (event) => {
+exports.handler = async () => {
   const apy = await getVaultsApy();
   const response = {
     statusCode: 200,

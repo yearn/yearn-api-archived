@@ -1,8 +1,11 @@
+'use strict';
+
 const dynamodb = require('../../../utils/dynamoDb');
-const db = dynamodb.doc;
 const _ = require('lodash');
 
-module.exports.handler = async (event) => {
+const db = dynamodb.doc;
+
+module.exports.handler = async () => {
   const params = {
     TableName: 'vaultApy',
   };

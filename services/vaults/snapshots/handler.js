@@ -2,10 +2,10 @@
 
 require('dotenv').config();
 const fetch = require('node-fetch');
-const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-const _ = require('lodash');
 
-module.exports.handler = async (event) => {
+const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
+
+module.exports.handler = async () => {
   const graphData = await getGraphData();
   return {
     statusCode: 200,

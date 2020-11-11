@@ -1,6 +1,9 @@
+'use strict';
+
 const dynamodb = require('../../../utils/dynamoDb');
-const db = dynamodb.doc;
 const _ = require('lodash');
+
+const db = dynamodb.doc;
 
 const getRepos = async () => {
   const params = {
@@ -11,7 +14,7 @@ const getRepos = async () => {
   return repos;
 };
 
-exports.handler = async (event) => {
+exports.handler = async () => {
   const repos = await getRepos();
   const orderedRepos = _.orderBy(repos, 'pushed_at', 'desc');
   const response = {
