@@ -1,10 +1,10 @@
-const dynamodb = require('../../../../utils/dynamoDb')
+const dynamodb = require('../../../../utils/dynamoDb');
 const db = dynamodb.doc;
-const _ = require("lodash");
+const _ = require('lodash');
 
 const getRepos = async () => {
   const params = {
-    TableName: "repos",
+    TableName: 'repos',
   };
   const entries = await db.scan(params).promise();
   const repos = entries.Items;
@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   let contributorMap = {};
 
   let contributorEntries = _.union(
-    ..._.map(repos, (repo) => repo.contributors)
+    ..._.map(repos, (repo) => repo.contributors),
   );
 
   const updateContributor = (contributor) => {
@@ -48,8 +48,8 @@ exports.handler = async (event) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify({ repoCount, commitCount, contributorCount }),
   };

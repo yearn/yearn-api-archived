@@ -1,17 +1,17 @@
-"use strict";
+'use strict';
 
-require("dotenv").config();
-const fetch = require("node-fetch");
+require('dotenv').config();
+const fetch = require('node-fetch');
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-const _ = require("lodash");
+const _ = require('lodash');
 
 module.exports.handler = async (event) => {
   const graphData = await getGraphData();
   return {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(graphData),
   };
@@ -36,7 +36,7 @@ const getGraphData = async () => {
   `;
 
   const response = await fetch(subgraphUrl, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ query }),
   });
 

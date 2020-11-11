@@ -24,18 +24,20 @@
 const AWS = require('aws-sdk');
 
 const options = {
-    apiVersion: "2012-08-10",
-    region: "localhost",
-    endpoint: "http://localhost:8000"
+  apiVersion: '2012-08-10',
+  region: 'localhost',
+  endpoint: 'http://localhost:8000',
 };
 
 const isOfflineLocalhost = function () {
-    // Depends on serverless-offline plugion which adds IS_OFFLINE to process.env when running offline
-    return process.env.IS_OFFLINE && process.env.SERVERLESS_STAGE == "local";
+  // Depends on serverless-offline plugion which adds IS_OFFLINE to process.env when running offline
+  return process.env.IS_OFFLINE && process.env.SERVERLESS_STAGE == 'local';
 };
 
 const dynamodb = {
-    doc: isOfflineLocalhost() ? new AWS.DynamoDB.DocumentClient(options) : new AWS.DynamoDB.DocumentClient(),
-    raw: isOfflineLocalhost() ? new AWS.DynamoDB(options) : new AWS.DynamoDB()
+  doc: isOfflineLocalhost()
+    ? new AWS.DynamoDB.DocumentClient(options)
+    : new AWS.DynamoDB.DocumentClient(),
+  raw: isOfflineLocalhost() ? new AWS.DynamoDB(options) : new AWS.DynamoDB(),
 };
 module.exports = dynamodb;

@@ -1,16 +1,16 @@
-const dynamodb = require('../../../utils/dynamoDb')
+const dynamodb = require('../../../utils/dynamoDb');
 const db = dynamodb.doc;
-const _ = require("lodash");
+const _ = require('lodash');
 
 module.exports.handler = async (event) => {
   const params = {
-    TableName: "vaultApy",
+    TableName: 'vaultApy',
   };
   const entries = await db.scan(params).promise();
   const vaults = entries.Items;
 
-  const symbol = "yCRV";
-  const assets = ["TUSD", "DAI", "USDT", "USDC"];
+  const symbol = 'yCRV';
+  const assets = ['TUSD', 'DAI', 'USDT', 'USDC'];
 
   const vault = _.find(vaults, { symbol });
   const { apyLoanscan = 0 } = vault;
@@ -27,8 +27,8 @@ module.exports.handler = async (event) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(loanScanResponse),
   };

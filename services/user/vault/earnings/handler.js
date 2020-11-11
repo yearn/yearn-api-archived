@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 
-require("dotenv").config();
-const vaultsConfig = require("./vaults");
-const fetch = require("node-fetch");
-const { pluck, uniq } = require("ramda/dist/ramda");
-const BigNumber = require("bignumber.js");
-const Web3 = require("web3");
+require('dotenv').config();
+const vaultsConfig = require('./vaults');
+const fetch = require('node-fetch');
+const { pluck, uniq } = require('ramda/dist/ramda');
+const BigNumber = require('bignumber.js');
+const Web3 = require('web3');
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-const _ = require("lodash");
+const _ = require('lodash');
 
 module.exports.handler = async (event) => {
   const userAddress = event.pathParameters.userAddress;
@@ -16,14 +16,14 @@ module.exports.handler = async (event) => {
   const activityData = await getActivityData(userAddress);
   const earningsPerVaultData = await buildEarningsPerVaultData(
     userAddress,
-    activityData
+    activityData,
   );
 
   return {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(earningsPerVaultData),
   };
@@ -70,7 +70,7 @@ async function getActivityData(address) {
   `;
 
   const response = await fetch(subgraphUrl, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ query }),
   });
 
@@ -98,31 +98,31 @@ async function buildEarningsPerVaultData(address, activityData) {
   }));
 
   // Use BigNumber for all large numbers to avoid scientific notation.
-  allDeposits = convertFieldsToBigNumber(allDeposits, ["amount"]);
-  allWithdrawals = convertFieldsToBigNumber(allWithdrawals, ["amount"]);
+  allDeposits = convertFieldsToBigNumber(allDeposits, ['amount']);
+  allWithdrawals = convertFieldsToBigNumber(allWithdrawals, ['amount']);
 
   allTransfersIn = convertFieldsToBigNumber(allTransfersIn, [
-    "shares",
-    "pricePerFullShare",
-    "balance",
-    "totalSupply",
-    "amount",
+    'shares',
+    'pricePerFullShare',
+    'balance',
+    'totalSupply',
+    'amount',
   ]);
 
   allTransfersOut = convertFieldsToBigNumber(allTransfersOut, [
-    "shares",
-    "pricePerFullShare",
-    "balance",
-    "totalSupply",
-    "amount",
+    'shares',
+    'pricePerFullShare',
+    'balance',
+    'totalSupply',
+    'amount',
   ]);
 
   // Get all the vaults the address has interacted with.
   const vaultAddresses = uniq([
-    ...pluck("vaultAddress", allDeposits),
-    ...pluck("vaultAddress", allWithdrawals),
-    ...pluck("vaultAddress", allTransfersIn),
-    ...pluck("vaultAddress", allTransfersOut),
+    ...pluck('vaultAddress', allDeposits),
+    ...pluck('vaultAddress', allWithdrawals),
+    ...pluck('vaultAddress', allTransfersIn),
+    ...pluck('vaultAddress', allTransfersOut),
   ]);
 
   // Get current holdings for all vaults address has interacted with.
@@ -134,11 +134,11 @@ async function buildEarningsPerVaultData(address, activityData) {
   let earningsByVault = vaultAddresses.map((vaultAddress) => {
     const depositsToVault = allDeposits
       .filter((deposit) => deposit.vaultAddress === vaultAddress)
-      .map((deposit) => _.omit(deposit, "vaultAddress"));
+      .map((deposit) => _.omit(deposit, 'vaultAddress'));
 
     const withdrawalsFromVault = allWithdrawals
       .filter((withdrawal) => withdrawal.vaultAddress === vaultAddress)
-      .map((withdrawal) => _.omit(withdrawal, "vaultAddress"));
+      .map((withdrawal) => _.omit(withdrawal, 'vaultAddress'));
 
     const transfersIntoVault = allTransfersIn
       .filter((transfer) => transfer.vaultAddress === vaultAddress)
@@ -152,34 +152,34 @@ async function buildEarningsPerVaultData(address, activityData) {
     const totalDepositedToVault = depositsToVault.reduce(
       (totalDeposited, deposit) => totalDeposited.plus(deposit.amount),
       new BigNumber(0),
-      depositsToVault
+      depositsToVault,
     );
 
     const totalWithdrawnFromVault = withdrawalsFromVault.reduce(
       (totalWithdrawn, withdrawl) => totalWithdrawn.plus(withdrawl.amount),
       new BigNumber(0),
-      withdrawalsFromVault
+      withdrawalsFromVault,
     );
 
     const totalTransferredIntoVault = transfersIntoVault.reduce(
       (totalTransferred, transfer) => totalTransferred.plus(transfer.amount),
       new BigNumber(0),
-      transfersIntoVault
+      transfersIntoVault,
     );
 
     const totalTransferredOutOfVault = transfersOutOfVault.reduce(
       (totalTransferred, transfer) => totalTransferred.plus(transfer.amount),
       new BigNumber(0),
-      transfersOutOfVault
+      transfersOutOfVault,
     );
 
     let vaultMetadata = vaultsConfig.find(
       (vaultConfig) =>
-        vaultConfig.address.toLowerCase() === vaultAddress.toLowerCase()
+        vaultConfig.address.toLowerCase() === vaultAddress.toLowerCase(),
     );
 
     let holdingsInVault = allHoldings.find(
-      (holding) => holding.vaultAddress === vaultAddress
+      (holding) => holding.vaultAddress === vaultAddress,
     ).holdings;
 
     let vaultEarnings = {
@@ -217,11 +217,11 @@ async function buildEarningsPerVaultData(address, activityData) {
 
 function stripUnneededTransferFields(transfer) {
   return _.omit(transfer, [
-    "vaultAddress",
-    "shares",
-    "pricePerFullShare",
-    "totalSupply",
-    "balance",
+    'vaultAddress',
+    'shares',
+    'pricePerFullShare',
+    'totalSupply',
+    'balance',
   ]);
 }
 
@@ -253,7 +253,7 @@ async function getHoldingsData(address, vaultAddresses) {
   for (const vaultAddress of vaultAddresses) {
     vaultContracts[vaultAddress] = new web3.eth.Contract(
       getMinimalVaultABI(),
-      vaultAddress
+      vaultAddress,
     );
   }
 
@@ -284,19 +284,19 @@ function getMinimalVaultABI() {
   return [
     {
       constant: true,
-      inputs: [{ type: "address", name: "arg0" }],
-      name: "balanceOf",
-      outputs: [{ type: "uint256", name: "out" }],
+      inputs: [{ type: 'address', name: 'arg0' }],
+      name: 'balanceOf',
+      outputs: [{ type: 'uint256', name: 'out' }],
       payable: false,
-      type: "function",
+      type: 'function',
     },
     {
       constant: true,
       inputs: [],
-      name: "getPricePerFullShare",
-      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      name: 'getPricePerFullShare',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       payable: false,
-      type: "function",
+      type: 'function',
     },
   ];
 }

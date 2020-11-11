@@ -1,10 +1,10 @@
-const dynamodb = require("../../../utils/dynamoDb")
+const dynamodb = require('../../../utils/dynamoDb');
 const db = dynamodb.doc;
-const _ = require("lodash");
+const _ = require('lodash');
 
 const getVaultsApy = async () => {
   const params = {
-    TableName: "vaultApy",
+    TableName: 'vaultApy',
   };
   const entries = await db.scan(params).promise();
   const apy = entries.Items;
@@ -24,8 +24,8 @@ exports.handler = async (event) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(apy),
   };

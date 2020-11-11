@@ -1,15 +1,15 @@
-require("dotenv").config();
-const dynamodb = require('../../../../utils/dynamoDb')
+require('dotenv').config();
+const dynamodb = require('../../../../utils/dynamoDb');
 const db = dynamodb.doc;
-const Web3 = require("web3");
-const moment = require("moment");
-const delay = require("delay");
-const _ = require("lodash");
-const vaults = require("./vaults");
-const EthDater = require("./ethereum-block-by-date.js");
-const { delayTime } = require("./config");
-const poolABI = require("./abis/pool");
-const {getBoost} = require('./getBoost');
+const Web3 = require('web3');
+const moment = require('moment');
+const delay = require('delay');
+const _ = require('lodash');
+const vaults = require('./vaults');
+const EthDater = require('./ethereum-block-by-date.js');
+const { delayTime } = require('./config');
+const poolABI = require('./abis/pool');
+const { getBoost } = require('./getBoost');
 const archiveNodeUrl = process.env.ARCHIVENODE_ENDPOINT;
 const infuraUrl = process.env.WEB3_ENDPOINT;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);
@@ -22,35 +22,35 @@ let threeDaysAgoBlock;
 let oneWeekAgoBlock;
 let oneMonthAgoBlock;
 let nbrBlocksInDay;
-const oneDayAgo = moment().subtract(1, "days").valueOf();
-const threeDaysAgo = moment().subtract(3, "days").valueOf();
-const oneWeekAgo = moment().subtract(1, "weeks").valueOf();
-const oneMonthAgo = moment().subtract(1, "months").valueOf();
+const oneDayAgo = moment().subtract(1, 'days').valueOf();
+const threeDaysAgo = moment().subtract(3, 'days').valueOf();
+const oneWeekAgo = moment().subtract(1, 'weeks').valueOf();
+const oneMonthAgo = moment().subtract(1, 'months').valueOf();
 
 const pools = [
   {
-    symbol: "yCRV",
-    address: "0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51",
+    symbol: 'yCRV',
+    address: '0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51',
   },
   {
-    symbol: "crvBUSD",
-    address: "0x79a8C46DeA5aDa233ABaFFD40F3A0A2B1e5A4F27",
+    symbol: 'crvBUSD',
+    address: '0x79a8C46DeA5aDa233ABaFFD40F3A0A2B1e5A4F27',
   },
   {
-    symbol: "crvBTC",
-    address: "0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714",
+    symbol: 'crvBTC',
+    address: '0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714',
   },
 ];
 
 const saveVault = async (data) => {
   const params = {
-    TableName: "vaultApy",
+    TableName: 'vaultApy',
     Item: data,
   };
   await db
     .put(params)
     .promise()
-    .catch((err) => console.log("err", err));
+    .catch((err) => console.log('err', err));
   console.log(`Saved ${data.name}`);
 };
 
@@ -58,7 +58,7 @@ const getApy = async (
   previousValue,
   currentValue,
   previousBlockNbr,
-  currentBlockNbr
+  currentBlockNbr,
 ) => {
   if (!previousValue) {
     return 0;
@@ -82,7 +82,7 @@ const getVirtualPrice = async (address, block) => {
 const getPricePerFullShare = async (
   vaultContract,
   block,
-  inceptionBlockNbr
+  inceptionBlockNbr,
 ) => {
   const contractDidntExist = block < inceptionBlockNbr;
   const inceptionBlock = block === inceptionBlockNbr;
@@ -114,37 +114,37 @@ const getApyForVault = async (vault) => {
   const pricePerFullShareInception = await getPricePerFullShare(
     vaultContract,
     inceptionBlockNbr,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 
   const pricePerFullShareCurrent = await getPricePerFullShare(
     vaultContract,
     currentBlockNbr,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 
   const pricePerFullShareOneDayAgo = await getPricePerFullShare(
     vaultContract,
     oneDayAgoBlock,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 
   const pricePerFullShareThreeDaysAgo = await getPricePerFullShare(
     vaultContract,
     threeDaysAgoBlock,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 
   const pricePerFullShareOneWeekAgo = await getPricePerFullShare(
     vaultContract,
     oneWeekAgoBlock,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 
   const pricePerFullShareOneMonthAgo = await getPricePerFullShare(
     vaultContract,
     oneMonthAgoBlock,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 
   const now = Date.now();
@@ -153,7 +153,7 @@ const getApyForVault = async (vault) => {
     pricePerFullShareInception,
     pricePerFullShareCurrent,
     inceptionBlockNbr,
-    currentBlockNbr
+    currentBlockNbr,
   );
 
   const apyOneDaySample =
@@ -161,7 +161,7 @@ const getApyForVault = async (vault) => {
       pricePerFullShareOneDayAgo,
       pricePerFullShareCurrent,
       oneDayAgoBlock,
-      currentBlockNbr
+      currentBlockNbr,
     )) || apyInceptionSample;
 
   const apyThreeDaySample =
@@ -169,7 +169,7 @@ const getApyForVault = async (vault) => {
       pricePerFullShareThreeDaysAgo,
       pricePerFullShareCurrent,
       threeDaysAgoBlock,
-      currentBlockNbr
+      currentBlockNbr,
     )) || apyInceptionSample;
 
   const apyOneWeekSample =
@@ -177,7 +177,7 @@ const getApyForVault = async (vault) => {
       pricePerFullShareOneWeekAgo,
       pricePerFullShareCurrent,
       oneWeekAgoBlock,
-      currentBlockNbr
+      currentBlockNbr,
     )) || apyInceptionSample;
 
   const apyOneMonthSample =
@@ -185,7 +185,7 @@ const getApyForVault = async (vault) => {
       pricePerFullShareOneMonthAgo,
       pricePerFullShareCurrent,
       oneMonthAgoBlock,
-      currentBlockNbr
+      currentBlockNbr,
     )) || apyInceptionSample;
 
   let apyLoanscan = apyOneDaySample;
@@ -202,18 +202,18 @@ const getApyForVault = async (vault) => {
     const poolAddress = pool.address;
     const virtualPriceCurrent = await getVirtualPrice(
       poolAddress,
-      currentBlockNbr
+      currentBlockNbr,
     );
     const virtualPriceOneDayAgo = await getVirtualPrice(
       poolAddress,
-      oneDayAgoBlock
+      oneDayAgoBlock,
     );
 
     const poolApy = await getApy(
       virtualPriceOneDayAgo,
       virtualPriceCurrent,
       oneDayAgoBlock,
-      currentBlockNbr
+      currentBlockNbr,
     );
 
     const poolPct = poolApy / 100;
@@ -241,7 +241,7 @@ const getLoanscanApyForVault = async (vault) => {
   const pricePerFullShareInception = await getPricePerFullShare(
     vaultContract,
     inceptionBlockNbr,
-    inceptionBlockNbr
+    inceptionBlockNbr,
   );
 };
 
@@ -264,7 +264,7 @@ const readVault = async (vault) => {
   const apy = await getApyForVault(vault);
   const boost = await getBoost(vault);
   const loanscanApy = await getLoanscanApyForVault(vault);
-  console.log("Vault: ", name, apy);
+  console.log('Vault: ', name, apy);
   const data = {
     address,
     name,
@@ -281,7 +281,7 @@ const readVault = async (vault) => {
 };
 
 module.exports.handler = async (context) => {
-  console.log("Fetching historical blocks");
+  console.log('Fetching historical blocks');
   currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
   await delay(delayTime);
   oneDayAgoBlock = (await blocks.getDate(oneDayAgo)).block;
@@ -289,7 +289,7 @@ module.exports.handler = async (context) => {
   oneWeekAgoBlock = (await blocks.getDate(oneWeekAgo)).block;
   oneMonthAgoBlock = (await blocks.getDate(oneMonthAgo)).block;
   nbrBlocksInDay = currentBlockNbr - oneDayAgoBlock;
-  console.log("Done fetching historical blocks");
+  console.log('Done fetching historical blocks');
 
   const vaultsWithApy = [];
   for (const vault of vaults) {
@@ -302,8 +302,8 @@ module.exports.handler = async (context) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(vaultsWithApy),
   };
