@@ -9,7 +9,7 @@ const _ = require('lodash');
 const vaults = require('./vaults');
 const EthDater = require('./ethereum-block-by-date.js');
 const { delayTime } = require('./config');
-const poolABI = require('./abis/pool');
+const poolABI = require('../../../../abi/pool');
 const { getBoost } = require('./getBoost');
 
 const db = dynamodb.doc;

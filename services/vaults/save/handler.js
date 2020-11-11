@@ -6,7 +6,7 @@ const _ = require('lodash');
 const dynamodb = require('../../../utils/dynamoDb');
 const fetch = require('node-fetch');
 const Web3 = require('web3');
-const yRegistryAbi = require('../abis/yRegistry');
+const yRegistryAbi = require('../../../abi/yRegistry.json');
 const delay = require('delay');
 
 const web3 = new Web3(process.env.WEB3_ENDPOINT);

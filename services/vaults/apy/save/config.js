@@ -1,10 +1,10 @@
 'use strict';
 
-const vaultContractABI = require('./abis/vaultV1');
-const vaultContractV2ABI = require('./abis/vaultV2');
-const vaultContractV3ABI = require('./abis/vaultV3');
-const vaultContractV4ABI = require('./abis/vaultV4');
-const vaultContractV5ABI = require('./abis/vaultV5');
+const vaultContractABI = require('../../../../abi/vaultV1');
+const vaultContractV2ABI = require('../../../../abi/vaultV2');
+const vaultContractV3ABI = require('../../../../abi/vaultV3');
+const vaultContractV4ABI = require('../../../../abi/vaultV4');
+const vaultContractV5ABI = require('../../../../abi/vaultV5');
 
 module.exports = {
   delayTime: 1000,
