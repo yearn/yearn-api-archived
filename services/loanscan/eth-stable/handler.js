@@ -1,10 +1,13 @@
-const dynamodb = require('../../../utils/dynamoDb')
-const db = dynamodb.doc;
-const _ = require("lodash");
+'use strict';
 
-module.exports.handler = async (event) => {
+const dynamodb = require('../../../utils/dynamoDb');
+const _ = require('lodash');
+
+const db = dynamodb.doc;
+
+module.exports.handler = async () => {
   const params = {
-    TableName: "vaultApy",
+    TableName: 'vaultApy',
   };
   const entries = await db.scan(params).promise();
   const items = entries.Items;
@@ -21,17 +24,17 @@ module.exports.handler = async (event) => {
 
   const filteredLendRates = _.filter(lendRates, (vault) => {
     return (
-      vault.tokenSymbol === "USDT" ||
-      vault.tokenSymbol === "USDC" ||
-      vault.tokenSymbol === "TUSD" ||
-      vault.tokenSymbol === "DAI" ||
-      vault.tokenSymbol === "WETH"
+      vault.tokenSymbol === 'USDT' ||
+      vault.tokenSymbol === 'USDC' ||
+      vault.tokenSymbol === 'TUSD' ||
+      vault.tokenSymbol === 'DAI' ||
+      vault.tokenSymbol === 'WETH'
     );
   });
 
   const fixedLendRates = filteredLendRates.map((rate) => {
-    if (rate.tokenSymbol === "WETH") {
-      rate.tokenSymbol = "ETH";
+    if (rate.tokenSymbol === 'WETH') {
+      rate.tokenSymbol = 'ETH';
     }
     return rate;
   });
@@ -43,8 +46,8 @@ module.exports.handler = async (event) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(loanScanResponse),
   };

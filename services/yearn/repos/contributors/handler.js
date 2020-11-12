@@ -1,28 +1,31 @@
-const dynamodb = require('../../../../utils/dynamoDb')
+'use strict';
+
+const dynamodb = require('../../../../utils/dynamoDb');
+const _ = require('lodash');
+
 const db = dynamodb.doc;
-const _ = require("lodash");
 
 const getRepos = async () => {
   const params = {
-    TableName: "repos",
+    TableName: 'repos',
   };
   const entries = await db.scan(params).promise();
   const repos = entries.Items;
   return repos;
 };
 
-exports.handler = async (event) => {
+exports.handler = async () => {
   const repos = await getRepos();
-  let contributorMap = {};
+  const contributorMap = {};
 
-  let contributorEntries = _.union(
-    ..._.map(repos, (repo) => repo.contributors)
+  const contributorEntries = _.union(
+    ..._.map(repos, (repo) => repo.contributors),
   );
 
   const updateContributor = (contributor) => {
     const { login } = contributor;
     let { contributions = 0 } = contributor;
-    let foundContributor = contributorMap[login];
+    const foundContributor = contributorMap[login];
     if (foundContributor) {
       const { contributions: previousContributions } = foundContributor;
       contributions += previousContributions;
@@ -40,8 +43,8 @@ exports.handler = async (event) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(contributors),
   };

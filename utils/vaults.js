@@ -1,4 +1,6 @@
-const _ = require("lodash");
+'use strict';
+
+const _ = require('lodash');
 
 // Search a vault data set array (statistics, apy) for data relevant to a specific vault
 const findDataForVault = (data, vault) => {

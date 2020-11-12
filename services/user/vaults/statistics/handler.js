@@ -1,18 +1,16 @@
-"use strict";
+'use strict';
 
-require("dotenv").config();
-const fetch = require("node-fetch");
-const { pluck, uniq } = require("ramda/dist/ramda");
-const BigNumber = require("bignumber.js");
-const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-const Web3 = require("web3");
+require('dotenv').config();
+const BigNumber = require('bignumber.js');
+const Web3 = require('web3');
+
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 
 const {
   getTransactions,
   getVaultAddressesForUser,
-} = require("../transactions/handler");
-const _ = require("lodash");
+} = require('../transactions/handler');
+const _ = require('lodash');
 
 const getVaultContract = (vaultAddress) => {
   const abi = getMinimalVaultABI();
@@ -60,7 +58,7 @@ const getVaultStatistics = async (vaultAddress, transactions, userAddress) => {
         return dataItem.plus(item.amount);
       },
       zero,
-      data
+      data,
     );
     return sum;
   };
@@ -96,7 +94,7 @@ const getVaultsStatistics = async (userAddress) => {
     await getVaultStatistics(vault, transactions, userAddress);
 
   const vaultsStatistics = await Promise.all(
-    vaultAddressesForUser.map(getVaultStatisticsWithTransactions)
+    vaultAddressesForUser.map(getVaultStatisticsWithTransactions),
   );
   return vaultsStatistics;
 };
@@ -107,8 +105,8 @@ module.exports.handler = async (event) => {
   return {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(vaultsStatistics),
   };
@@ -118,19 +116,19 @@ function getMinimalVaultABI() {
   return [
     {
       constant: true,
-      inputs: [{ type: "address", name: "arg0" }],
-      name: "balanceOf",
-      outputs: [{ type: "uint256", name: "out" }],
+      inputs: [{ type: 'address', name: 'arg0' }],
+      name: 'balanceOf',
+      outputs: [{ type: 'uint256', name: 'out' }],
       payable: false,
-      type: "function",
+      type: 'function',
     },
     {
       constant: true,
       inputs: [],
-      name: "getPricePerFullShare",
-      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      name: 'getPricePerFullShare',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       payable: false,
-      type: "function",
+      type: 'function',
     },
   ];
 }

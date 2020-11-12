@@ -1,22 +1,23 @@
+'use strict';
 
-const _ = require("lodash");
-const { injectDataIntoVaultAtKey } = require("../../../utils/vaults");
+const _ = require('lodash');
+const { injectDataIntoVaultAtKey } = require('../../../utils/vaults');
 
 const {
   getTransactions,
   getVaultAddressesForUser,
-} = require("./transactions/handler");
-const { getVaultsStatistics } = require("./statistics/handler");
-const { getVaultsApy } = require("../../vaults/apy/handler");
-const { getVaults } = require("../../vaults/handler");
+} = require('./transactions/handler');
+const { getVaultsStatistics } = require('./statistics/handler');
+const { getVaultsApy } = require('../../vaults/apy/handler');
+const { getVaults } = require('../../vaults/handler');
 
 module.exports.handler = async (event) => {
   const userAddress = event.pathParameters.userAddress;
   const queryParams = event.queryStringParameters;
-  const showTransactions = _.get(queryParams, "transactions") === "true";
-  const showAllVaults = _.get(queryParams, "showall") === "true";
-  const showStatistics = _.get(queryParams, "statistics") === "true";
-  const showApy = _.get(queryParams, "apy") === "true";
+  const showTransactions = _.get(queryParams, 'transactions') === 'true';
+  const showAllVaults = _.get(queryParams, 'showall') === 'true';
+  const showStatistics = _.get(queryParams, 'statistics') === 'true';
+  const showApy = _.get(queryParams, 'apy') === 'true';
   const allVaults = await getVaults();
 
   /**
@@ -34,14 +35,14 @@ module.exports.handler = async (event) => {
   // Inject APY into vaults
   const apy = showApy && (await getVaultsApy());
   const injectApy = (vault) => {
-    const newVault = injectDataIntoVaultAtKey(vault, apy, "apy");
+    const newVault = injectDataIntoVaultAtKey(vault, apy, 'apy');
     return newVault;
   };
 
   // Inject statistics into vaults
   const statistics = showStatistics && (await getVaultsStatistics(userAddress));
   const injectStatistics = (vault) => {
-    const newVault = injectDataIntoVaultAtKey(vault, statistics, "statistics");
+    const newVault = injectDataIntoVaultAtKey(vault, statistics, 'statistics');
     return newVault;
   };
 
@@ -51,7 +52,7 @@ module.exports.handler = async (event) => {
     const newVault = injectDataIntoVaultAtKey(
       vault,
       transactions,
-      "transactions"
+      'transactions',
     );
     return newVault;
   };
@@ -69,8 +70,8 @@ module.exports.handler = async (event) => {
   const response = {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(vaultsWithData),
   };
