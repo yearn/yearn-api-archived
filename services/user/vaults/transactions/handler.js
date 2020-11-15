@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-require("dotenv").config();
-const fetch = require("node-fetch");
-const { pluck, uniq } = require("ramda/dist/ramda");
-const BigNumber = require("bignumber.js");
+require('dotenv').config();
+const fetch = require('node-fetch');
+const { pluck, uniq } = require('ramda/dist/ramda');
+const { getVaults } = require('../../../vaults/handler');
+const _ = require('lodash');
+
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-const { getVaults } = require("../../../vaults/handler");
-const _ = require("lodash");
 
 module.exports.handler = async (event) => {
   const userAddress = event.pathParameters.userAddress;
@@ -14,8 +14,8 @@ module.exports.handler = async (event) => {
   return {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(transactions),
   };
@@ -57,7 +57,7 @@ const getGraphTransactions = async (userAddress) => {
   `;
 
   const response = await fetch(subgraphUrl, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ query }),
   });
 
@@ -68,7 +68,7 @@ const getGraphTransactions = async (userAddress) => {
 
 const getVaultAddressesForUserWithGraphTransactions = (
   userAddress,
-  graphTransactions
+  graphTransactions,
 ) => {
   const {
     deposits,
@@ -77,10 +77,10 @@ const getVaultAddressesForUserWithGraphTransactions = (
     transfersOut,
   } = graphTransactions;
   const vaultAddressesForUser = uniq([
-    ...pluck("vaultAddress", deposits),
-    ...pluck("vaultAddress", withdrawals),
-    ...pluck("vaultAddress", transfersIn),
-    ...pluck("vaultAddress", transfersOut),
+    ...pluck('vaultAddress', deposits),
+    ...pluck('vaultAddress', withdrawals),
+    ...pluck('vaultAddress', transfersIn),
+    ...pluck('vaultAddress', transfersOut),
   ]);
   return vaultAddressesForUser;
 };
@@ -89,14 +89,15 @@ const getVaultAddressesForUser = async (userAddress) => {
   const graphTransactions = await getGraphTransactions(userAddress);
   const vaultAddressesForUser = getVaultAddressesForUserWithGraphTransactions(
     userAddress,
-    graphTransactions
+    graphTransactions,
   );
   return vaultAddressesForUser;
 };
 
 const getTransactions = async (userAddress) => {
   const graphTransactions = await getGraphTransactions(userAddress);
-  let { deposits, withdrawals, transfersIn, transfersOut } = graphTransactions;
+  const { deposits, withdrawals } = graphTransactions;
+  let { transfersIn, transfersOut } = graphTransactions;
 
   const injectAmountIntoTransfer = (transfer) => {
     const amount = (transfer.balance * transfer.shares) / transfer.totalSupply;
@@ -113,12 +114,12 @@ const getTransactions = async (userAddress) => {
   // Get all the vaults the address has interacted with.
   const vaultAddresses = getVaultAddressesForUserWithGraphTransactions(
     userAddress,
-    graphTransactions
+    graphTransactions,
   );
 
   const vaults = await getVaults();
 
-  const removeVaultAddressField = (deposit) => _.omit(deposit, "vaultAddress");
+  const removeVaultAddressField = (deposit) => _.omit(deposit, 'vaultAddress');
 
   const getTransactionsByVaultAddress = (vaultAddress) => {
     const findItemByVaultAddress = (item) => item.vaultAddress === vaultAddress;
@@ -168,11 +169,11 @@ function correctTransactionAddress(item) {
 
 function stripUnneededTransferFields(transfer) {
   return _.omit(transfer, [
-    "vaultAddress",
-    "shares",
-    "pricePerFullShare",
-    "totalSupply",
-    "balance",
+    'vaultAddress',
+    'shares',
+    'pricePerFullShare',
+    'totalSupply',
+    'balance',
   ]);
 }
 

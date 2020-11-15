@@ -25,44 +25,13 @@ git clone https://github.com/yearn-integrations/yearn-api.git
 ```
 
 - Pick an example environment file to use:
-  - .env.local - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
-  - .env.dev - uses dynamodb in AWS with credentials (use your own or ask x48 for read-only keys)
+  - .sample.env.local - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
+  - .sample.env.dev - uses dynamodb in AWS with credentials (use your own or ask x48 for read-only keys)
 
 - Copy the example .env file
 
 ```
 cd yearn-api
-cp .env.local .env
-```
-
-- Start the docker container
-
-```
-docker-compose up
-```
-
-- The API should now be running locally on your dev machine
-
-### Optional - Configure environment variables
-
-- .env.local and .env.dev contain sample API keys for various services (Infura/Etherscan). This is done to enable developers to get up to speed quickly. If you are planning on developing APIs that extensively utilize these keys please consider generating new API keys :)
-- Update your .env file to use your own custom web3, archive node, and graph endpoints
-- Update your .env file to use your own custom AWS Credentials (if using .env.dev and not .env.local)
-
-## Usage Instructions
-
-### Use "Offline Mode" for local development and testing
-
-- Run the command `docker-compose up` to test API endpoints locally
-- You can reach the API under localhost:3000
-  - use localhost:3000/local or localhost:3000/dev, depending on your environment
-  - If you want to change the local port, change the "ports" entry under "serverless" in the docker-compose.yml
-- The dirs config, services and utils are mounted into the running container, so you code changes will become available instantly on the running instance
-  - If you want to change that, remove the "volumes" entries under "serverless" in the docker-compose.yml
-
-## Stages
-
-- Currently four stages are available
 - `prod` is used for production deployments. Production endpoint is https://api.yearn.tools
 - `dev` is used for development purposes. Development endpoint is https://dev-api.yearn.tools
 - `staging` is used for APIs pending production deployment. Staging endpoint is https://staging-api.yearn.tools
