@@ -1,8 +1,8 @@
 const Web3 = require("web3");
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const yRegistryAddress = "0x3ee41c098f9666ed2ea246f4d2558010e59d63a0";
-const yRegistryAbi = require("../../abis/yRegistry");
-const strategyMinABI = require("./abis/strategyMinABI");
+const yRegistryAbi = require("../../../../abi/yRegistry.json");
+const strategyMinABI = require("../../../../abi/strategyMinABI.json");
 const _ = require("lodash");
 
 
