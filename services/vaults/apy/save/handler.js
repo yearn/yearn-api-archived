@@ -50,7 +50,7 @@ const saveVault = async (data) => {
     TableName: 'vaultApy',
     Item: data,
   };
-  await   
+  await db
     .put(params)
     .promise()
     .catch((err) => console.log('err', err));
