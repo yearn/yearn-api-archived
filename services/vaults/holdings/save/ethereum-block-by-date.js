@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Forked/modified version of etehereum-block-by-date
  * Made the library synchronous and added delays for rate-limited arachivenode
