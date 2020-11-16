@@ -6,6 +6,7 @@ plugins:
   - serverless-domain-manager
   - serverless-export-swagger
   - serverless-aws-documentation
+  - serverless-deployment-bucket
 
 custom:
   defaultStage: dev
@@ -48,6 +49,9 @@ provider:
   name: aws
   runtime: nodejs12.x
   profile: ${file(./awsProfile.yml):aws_profile}
+  deploymentBucket:
+    name: ${self:custom.currentStage}-yearn.finance
+    serverSideEncryption: AES256
 functions:
   # /vaults
   vaults:
