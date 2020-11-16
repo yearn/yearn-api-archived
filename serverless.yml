@@ -50,7 +50,7 @@ provider:
   runtime: nodejs12.x
   profile: ${file(./awsProfile.yml):aws_profile}
   deploymentBucket:
-    name: ${self:custom.currentStage}-yearn.finance
+    name: ${self:custom.currentStage}-deployment-yearn.finance
     serverSideEncryption: AES256
 functions:
   # /vaults
