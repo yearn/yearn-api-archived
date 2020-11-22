@@ -18,3 +18,4 @@ services:
       - "./config:/opt/app/config:rw"
       - "./services:/opt/app/services:rw"
       - "./utils:/opt/app/utils:rw"
+      - "./abi:/opt/app/abi:rw"

@@ -1,3 +1,10 @@
+/* 
+
+Holdings calculated here are for Vaults, Strategies and the Earn yTokens
+This is part of the TVL calculation defined here: https://hackmd.io/@dudesahn/BkxKfTzqw
+
+ */
+
 'use strict';
 
 require('dotenv').config();
@@ -9,7 +16,7 @@ const _ = require("lodash");
 const vaults = require("./vaults");
 const EthDater = require("./ethereum-block-by-date.js");
 const { delayTime } = require("./config");
-const poolABI = require('../../../../abi/pool');
+
 const { getHoldings } = require('./getHoldings');
 
 const db = dynamodb.doc;
@@ -18,25 +25,13 @@ const infuraUrl = process.env.WEB3_ENDPOINT;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);
 const infuraWeb3 = new Web3(infuraUrl);
 const blocks = new EthDater(archiveNodeWeb3, delayTime);
+const axios = require('axios');
 
-const pools = [
-  {
-    symbol: "yCRV",
-    address: "0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51",
-  },
-  {
-    symbol: "crvBUSD",
-    address: "0x79a8C46DeA5aDa233ABaFFD40F3A0A2B1e5A4F27",
-  },
-  {
-    symbol: "crvBTC",
-    address: "0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714",
-  },
-];
+
 
 const saveVault = async (data) => {
   const params = {
-    TableName: "vaultApy",
+    TableName: "holdings",
     Item: data,
   };
   await db
@@ -48,7 +43,6 @@ const saveVault = async (data) => {
 
 
 
-  const vaultContract = new archiveNodeWeb3.eth.Contract(abi, address);
 
 const readVault = async (vault) => {
   const {
@@ -59,53 +53,59 @@ const readVault = async (vault) => {
     vaultContractABI: abi,
     vaultContractAddress: address,
     erc20address: tokenAddress,
+    price_id: price_id
   } = vault;
   console.log(`Reading vault ${vault.name}`);
   if (!abi || !address) {
     console.log(`Vault ABI not found: ${name}`);
     return null;
   }
-  const strategyHoldings= await getHoldings(vault);
- 
-  console.log("Vault: ", name, apy);
-  const data = {
-    address,
-    name,
-    symbol,
-    timestamp: Date.now(),
-    vaultHoldings,
-    strategyHoldings,
-  };
+  try{
+    const holdings= await getHoldings(vault);
+    const priceFeed = await axios.get('https://api.coingecko.com/api/v3/coins/' + vault.price_id);
+    console.log("Vault: ", name);
+    const data = {
+      address,
+      name,
+      symbol,
+      price_id,
+      price_usd: priceFeed.data.market_data.current_price.usd,
+      timestamp: Date.now(),
+      holdings    
+    };
   await saveVault(data);
-  return data;
+    console.log(data);
+    return data;
+  } catch(e) {
+    console.log("error", e);
+    return e
+  }
+ 
+  
 };
 
 module.exports.handler = async (context) => {
-  console.log("Fetching historical blocks");
-  currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
-  await delay(delayTime);
-  oneDayAgoBlock = (await blocks.getDate(oneDayAgo)).block;
-  threeDaysAgoBlock = (await blocks.getDate(threeDaysAgo)).block;
-  oneWeekAgoBlock = (await blocks.getDate(oneWeekAgo)).block;
-  oneMonthAgoBlock = (await blocks.getDate(oneMonthAgo)).block;
-  nbrBlocksInDay = currentBlockNbr - oneDayAgoBlock;
-  console.log("Done fetching historical blocks");
+  let vaultsTVL = 0;
 
-  const vaultsWithApy = [];
+  const vaultsWithHoldings = [];
   for (const vault of vaults) {
-    const vaultWithApy = await readVault(vault);
-    if (vaultWithApy !== null) {
-      vaultsWithApy.push(vaultWithApy);
+    const vaultWithHoldings = await readVault(vault);
+    /* vaultsTVL += (vaultWithHoldings.holdings.vaultHoldings + vaultWithHoldings.holdings.strategyHoldings) * vaultWithHoldings.price_usd; */
+    /* console.log(vaultsTVL); */
+    if (vaultWithHoldings !== null) {
+      vaultsWithHoldings.push(vaultWithHoldings);
     }
+    
     await delay(delayTime);
   }
+  vaultsWithHoldings.push({TotalvaultsTVL: vaultsTVL});
   const response = {
     statusCode: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: JSON.stringify(vaultsWithApy),
+    body: JSON.stringify(vaultsWithHoldings),
   };
   return response;
 };

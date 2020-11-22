@@ -142,6 +142,7 @@ module.exports.handler = async () => {
       delegated: vaultInfo.isDelegatedArray[idx],
       timestamp: Date.now(),
     };
+    console.log(vault);
     await saveVault(vault);
     return vault;
   };
@@ -165,3 +166,4 @@ module.exports.handler = async () => {
   };
   return response;
 };
+
