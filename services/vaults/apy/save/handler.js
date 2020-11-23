@@ -68,7 +68,7 @@ const getApy = async (previousValue, currentValue, previousBlockNbr) => {
   return yearlyRoi;
 };
 
-module.exports.getVirtualPrice = async (address, block) => {
+const getVirtualPrice = async (address, block) => {
   const poolContract = new archiveNodeWeb3.eth.Contract(poolABI, address);
   const virtualPrice = await poolContract.methods
     .get_virtual_price()
@@ -273,11 +273,10 @@ const readVault = async (vault) => {
     boost,
   };
   await saveVault(data);
-  console.log(data);
   return data;
 };
 
-module.exports.handler = async () => {
+const handler = async () => {
   console.log('Fetching historical blocks');
   currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
   await delay(delayTime);
@@ -306,3 +305,5 @@ module.exports.handler = async () => {
   };
   return response;
 };
+
+module.exports = {getVirtualPrice, handler};
