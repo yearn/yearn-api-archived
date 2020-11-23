@@ -4,8 +4,9 @@ const _ = require('lodash');
 
 // Search a vault data set array (statistics, apy) for data relevant to a specific vault
 const findDataForVault = (data, vault) => {
-  const findVault = (dataEntry) =>
-    dataEntry.vaultAddress.toLowerCase() === vault.address.toLowerCase();
+  const findVault = (dataEntry) => {
+    return _.lowerCase(dataEntry.vaultAddress) === _.lowerCase(vault.address.toLowerCase);
+  }
 
   const foundData = _.clone(_.find(data, findVault));
   if (foundData) {
