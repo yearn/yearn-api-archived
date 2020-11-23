@@ -67,7 +67,6 @@ const getVaultsStrategy = async (vault) => {
 const getPoolTotalSupply = async (poolAddress) => {
   const poolContract = new web3.eth.Contract(poolMinABI, poolAddress);
   const _totalSupply = await poolContract.methods.totalSupply().call() / 1e18;
-  console.log("totalSupply", _totalSupply);
   return _totalSupply;
 }
 
