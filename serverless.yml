@@ -14,15 +14,15 @@ custom:
   customDomain: ${file(./config/serverless/domain.js):${self:custom.currentStage}}
   serverless-offline:
     useChildProcesses: true
-  basePath: ""
+  basePath: ''
   swaggerDestinations:
-    s3BucketName: "yearn.tools"
-    s3KeyName: "swagger/swagger.json"
+    s3BucketName: 'yearn.tools'
+    s3KeyName: 'swagger/swagger.json'
     acl: public-read
   documentation:
     api:
       info:
-        version: "1.02"
+        version: '1.02'
         title: Yearn API
         description: Yearn API
       tags:
@@ -73,9 +73,9 @@ functions:
               - Vaults
             description: Vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0). Includes controller/strategy info. Updates once an hour.
           queryParams:
-            - name: "apy"
-              description: "Include vault APY"
-              type: "boolean"
+            - name: 'apy'
+              description: 'Include vault APY'
+              type: 'boolean'
               required: false
 
   vaults-snapshots:
@@ -157,8 +157,8 @@ functions:
             tags:
               - Vaults
             description: >
-              Vault holdings is calculated based on strategy + vault holdings per vault. 
-              
+              Vault holdings is calculated based on strategy + vault holdings per vault.
+
   vaults-holdings-save:
     handler: services/vaults/holdings/save/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
@@ -166,7 +166,7 @@ functions:
       - http:
           path: /vaults/holdings/save
           method: get
- # /user
+  # /user
   user-vaults:
     handler: services/user/vaults/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
@@ -192,24 +192,24 @@ functions:
             description: >
               Optionally include vault statistics and transactions per user. Valid query param values are "true" and "false"
           pathParams:
-            - name: "userAddress"
-              description: "User account address. Format: 0x{...}"
+            - name: 'userAddress'
+              description: 'User account address. Format: 0x{...}'
           queryParams:
-            - name: "apy"
-              description: "Include vault APY"
-              type: "boolean"
+            - name: 'apy'
+              description: 'Include vault APY'
+              type: 'boolean'
               required: false
-            - name: "transactions"
-              description: "Include user vault transactions"
-              type: "boolean"
+            - name: 'transactions'
+              description: 'Include user vault transactions'
+              type: 'boolean'
               required: false
-            - name: "showall"
-              description: "Inclue all vaults (including vaults the user has not interacted with)"
-              type: "boolean"
+            - name: 'showall'
+              description: 'Inclue all vaults (including vaults the user has not interacted with)'
+              type: 'boolean'
               required: false
-            - name: "statistics"
-              description: "Include user vault statistics (deposits, withdraws, transfers)"
-              type: "boolean"
+            - name: 'statistics'
+              description: 'Include user vault statistics (deposits, withdraws, transfers)'
+              type: 'boolean'
               required: false
 
   user-vaults-transactions:
@@ -232,8 +232,8 @@ functions:
             description: >
               Includes amount/shares, calculated by tracing the Yearn vault contract methods. Transactions come from the Yearn subgraph.
           pathParams:
-            - name: "userAddress"
-              description: "User account address. Format: 0x{...}"
+            - name: 'userAddress'
+              description: 'User account address. Format: 0x{...}'
 
   user-vaults-statistics:
     handler: services/user/vaults/statistics/handler.handler
@@ -255,8 +255,8 @@ functions:
             description: >
               Currently earnings include token transfer events (such as zaps). This should be configurable in the future. Statistics come from the Yearn subgraph.
           pathParams:
-            - name: "userAddress"
-              description: "User account address. Format: 0x{...}"
+            - name: 'userAddress'
+              description: 'User account address. Format: 0x{...}'
 
   user-vaults-earnings:
     handler: services/user/vault/earnings/handler.handler
@@ -272,8 +272,8 @@ functions:
               paths:
                 userAddress: true
           pathParams:
-            - name: "userAddress"
-              description: "User account address. Format: 0x{...}"
+            - name: 'userAddress'
+              description: 'User account address. Format: 0x{...}'
 
   # /loanscan
   loanscan-link:
@@ -361,15 +361,6 @@ functions:
     handler: services/yearn/repos/save/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
-    events:
-      - http:
-          path: /yearn/repos/save
-          method: get
-          cors: true
-          documentation:
-            summary: Save repos and contributors. Can only be called once per hour
-            tags:
-              - Yearn
 
   yearn-repos:
     handler: services/yearn/repos/handler.handler
