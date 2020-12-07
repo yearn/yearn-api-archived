@@ -28,10 +28,12 @@
   },
   "dependencies": {
     "aws-sdk": "^2.790.0",
+    "axios": "^0.21.0",
     "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
     "delay": "^4.4.0",
     "dotenv": "^8.2.0",
+    "lint": "^0.7.0",
     "lodash": "^4.17.20",
     "moment": "^2.28.0",
     "node-fetch": "^2.6.1",
