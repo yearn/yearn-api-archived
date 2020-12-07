@@ -4,7 +4,6 @@ require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
 const Web3 = require('web3');
 const moment = require('moment');
-const delay = require('delay');
 const _ = require('lodash');
 const vaults = require('./vaults');
 const EthDater = require('./ethereum-block-by-date.js');
@@ -73,7 +72,6 @@ const getVirtualPrice = async (address, block) => {
   const virtualPrice = await poolContract.methods
     .get_virtual_price()
     .call(undefined, block);
-  await delay(delayTime);
   return virtualPrice;
 };
 
@@ -93,7 +91,6 @@ const getPricePerFullShare = async (
   const pricePerFullShare = await vaultContract.methods
     .getPricePerFullShare()
     .call(undefined, block);
-  await delay(delayTime);
   return pricePerFullShare;
 };
 
@@ -184,7 +181,7 @@ const getApyForVault = async (vault) => {
       currentBlockNbr,
     )) || apyInceptionSample;
 
-  let apyLoanscan = apyOneDaySample;
+  let apyLoanscan = apyOneMonthSample;
 
   const apyData = {
     apyInceptionSample,
@@ -200,21 +197,22 @@ const getApyForVault = async (vault) => {
       poolAddress,
       currentBlockNbr,
     );
-    const virtualPriceOneDayAgo = await getVirtualPrice(
+    const virtualPriceOneMonthAgo = await getVirtualPrice(
       poolAddress,
-      oneDayAgoBlock,
+      oneMonthAgoBlock,
     );
 
     const poolApy = await getApy(
-      virtualPriceOneDayAgo,
+      virtualPriceOneMonthAgo,
       virtualPriceCurrent,
-      oneDayAgoBlock,
+      oneMonthAgoBlock,
       currentBlockNbr,
     );
 
     const poolPct = poolApy / 100;
-    const vaultPct = apyOneDaySample / 100;
+    const vaultPct = apyOneMonthSample / 100;
     apyLoanscan = ((1 + poolPct) * (1 + vaultPct) - 1) * 100;
+    console.log('set to2', apyLoanscan, address);
 
     return { ...apyData, poolApy, apyLoanscan };
   }
@@ -224,22 +222,6 @@ const getApyForVault = async (vault) => {
     apyLoanscan,
   };
 };
-
-// const getLoanscanApyForVault = async (vault) => {
-//   const {
-//     lastMeasurement: inceptionBlockNbr,
-//     vaultContractABI: abi,
-//     vaultContractAddress: address,
-//   } = vault;
-
-//   const vaultContract = new archiveNodeWeb3.eth.Contract(abi, address);
-
-//   const pricePerFullShareInception = await getPricePerFullShare(
-//     vaultContract,
-//     inceptionBlockNbr,
-//     inceptionBlockNbr,
-//   );
-// };
 
 const readVault = async (vault) => {
   const {
@@ -256,10 +238,8 @@ const readVault = async (vault) => {
     console.log(`Vault ABI not found: ${name}`);
     return null;
   }
-  // const contract = new infuraWeb3.eth.Contract(abi, address);
   const apy = await getApyForVault(vault);
   const boost = await getBoost(vault);
-  // const loanscanApy = await getLoanscanApyForVault(vault);
   console.log('Vault: ', name, apy);
   const data = {
     address,
@@ -279,7 +259,6 @@ const readVault = async (vault) => {
 const handler = async () => {
   console.log('Fetching historical blocks');
   currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
-  await delay(delayTime);
   oneDayAgoBlock = (await blocks.getDate(oneDayAgo)).block;
   threeDaysAgoBlock = (await blocks.getDate(threeDaysAgo)).block;
   oneWeekAgoBlock = (await blocks.getDate(oneWeekAgo)).block;
@@ -293,7 +272,6 @@ const handler = async () => {
     if (vaultWithApy !== null) {
       vaultsWithApy.push(vaultWithApy);
     }
-    await delay(delayTime);
   }
   const response = {
     statusCode: 200,
@@ -306,4 +284,4 @@ const handler = async () => {
   return response;
 };
 
-module.exports = {getVirtualPrice, handler};
+module.exports = { getVirtualPrice, handler };
