@@ -276,7 +276,7 @@ const readVault = async (vault) => {
   return data;
 };
 
-module.exports.handler = async () => {
+const handler = async () => {
   console.log('Fetching historical blocks');
   currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
   await delay(delayTime);
@@ -305,3 +305,5 @@ module.exports.handler = async () => {
   };
   return response;
 };
+
+module.exports = {getVirtualPrice, handler};

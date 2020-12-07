@@ -1,6 +1,6 @@
 'use strict';
 
-const db = dynamodb.doc;
+
 require('dotenv').config();
 const _ = require('lodash');
 const dynamodb = require('../../../utils/dynamoDb');
@@ -9,6 +9,7 @@ const Web3 = require('web3');
 const yRegistryAbi = require('../../../abi/yRegistry.json');
 const delay = require('delay');
 
+const db = dynamodb.doc;
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
@@ -142,6 +143,7 @@ module.exports.handler = async () => {
       delegated: vaultInfo.isDelegatedArray[idx],
       timestamp: Date.now(),
     };
+    console.log(vault);
     await saveVault(vault);
     return vault;
   };
@@ -165,3 +167,4 @@ module.exports.handler = async () => {
   };
   return response;
 };
+
