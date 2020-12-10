@@ -28,11 +28,6 @@ const vaultAliases = {
   '0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c': 'yUSD Vault',
 };
 
-const vaultIcons = {
-  'yDAI+yUSDC+yUSDT+yTUSD':
-    'https://assets.coingecko.com/coins/images/12210/large/yUSD.png?1600166557',
-};
-
 const fetchContractMetadata = async (address) => {
   const url = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}&apikey=${etherscanApiKey}`;
   const resp = await fetch(url).then((res) => res.json());
@@ -98,15 +93,12 @@ module.exports.handler = async () => {
       10,
     );
 
-    const tokenInfo = await fetch(
-      `https://api.coingecko.com/api/v3/coins/ethereum/contract/${tokenAddress}`,
-    ).then((res) => res.json());
     const tokenSymbolAlias = tokenSymbolAliases[tokenSymbol] || tokenSymbol;
     const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
     const vaultAlias =
       vaultAliases[vaultAddress] || `${tokenSymbolAlias} Vault`;
-    const tokenIcon = _.get(tokenInfo, 'image.large');
-    const vaultIcon = vaultIcons[tokenSymbol];
+    const tokenIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${tokenAddress}/logo-128.png`;
+    const vaultIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${vaultAddress}/logo-128.png`;
     const vault = {
       address: vaultAddress,
       name: vaultName,
