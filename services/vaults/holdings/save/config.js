@@ -7,7 +7,7 @@ const vaultContractV4ABI = require('../../../../abi/vaultV4');
 const vaultContractV5ABI = require('../../../../abi/vaultV5');
 
 module.exports = {
-  delayTime: 0,
+  delayTime: 1000,
   vaultContractABI,
   vaultContractV2ABI,
   vaultContractV3ABI,

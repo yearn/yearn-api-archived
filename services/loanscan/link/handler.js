@@ -13,8 +13,8 @@ module.exports.handler = async () => {
   const items = entries.Items;
 
   const getLoanScanFormat = (item) => {
-    const { apyOneDaySample, symbol: tokenSymbol } = item;
-    const apy = apyOneDaySample / 100;
+    const { apyOneMonthSample, symbol: tokenSymbol } = item;
+    const apy = apyOneMonthSample / 100;
     const apr = apy;
     const loanScanData = { apy, apr, tokenSymbol };
     return loanScanData;

@@ -1,18 +1,18 @@
 'use strict';
 
-const db = dynamodb.doc;
 require('dotenv').config();
 const _ = require('lodash');
 const dynamodb = require('../../../utils/dynamoDb');
 const fetch = require('node-fetch');
 const Web3 = require('web3');
 const yRegistryAbi = require('../../../abi/yRegistry.json');
+const vaultAbi = require('../../../abi/vaultV5.json');
 const delay = require('delay');
-
+const db = dynamodb.doc;
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
-const delayTime = 500;
+const delayTime = 300;
 
 const tokenSymbolAliases = {
   'yDAI+yUSDC+yUSDT+yTUSD': 'yCRV',
@@ -26,11 +26,6 @@ const symbolAliases = {
 
 const vaultAliases = {
   '0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c': 'yUSD Vault',
-};
-
-const vaultIcons = {
-  'yDAI+yUSDC+yUSDT+yTUSD':
-    'https://assets.coingecko.com/coins/images/12210/large/yUSD.png?1600166557',
 };
 
 const fetchContractMetadata = async (address) => {
@@ -47,25 +42,15 @@ const fetchContractName = async (address) => {
   return contractName;
 };
 
-const fetchAbi = async (address) => {
-  const url = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${etherscanApiKey}`;
-  const resp = await fetch(url).then((res) => res.json());
-  const abi = JSON.parse(resp.result);
-  await delay(delayTime);
-  return abi;
-};
-
 const getContract = async (address) => {
-  const abi = await fetchAbi(address);
+  const abi = vaultAbi;
   const contract = new web3.eth.Contract(abi, address);
-  await delay(delayTime);
   return contract;
 };
 
 const callContractMethod = async (contract, method) => {
   try {
     const result = await contract.methods[method]().call();
-    await delay(delayTime);
     return result;
   } catch (err) {
     console.log('err', method);
@@ -91,17 +76,13 @@ module.exports.handler = async () => {
     yRegistryAddress,
   );
   const vaultAddresses = await registryContract.methods.getVaults().call();
-  await delay(delayTime);
 
   const vaultInfo = await registryContract.methods.getVaultsInfo().call();
-  await delay(delayTime);
 
   const getVault = async (vaultAddress, idx) => {
     const controllerAddress = vaultInfo.controllerArray[idx];
     const strategyAddress = vaultInfo.strategyArray[idx];
     const vaultContract = await getContract(vaultAddress);
-    // const controllerContract = await getContract(controllerAddress);
-    // const strategyContract = await getContract(strategyAddress);
     const vaultName = await callContractMethod(vaultContract, 'name');
     const vaultSymbol = await callContractMethod(vaultContract, 'symbol');
     const tokenSymbol = vaultSymbol.substring(1);
@@ -112,15 +93,12 @@ module.exports.handler = async () => {
       10,
     );
 
-    const tokenInfo = await fetch(
-      `https://api.coingecko.com/api/v3/coins/ethereum/contract/${tokenAddress}`,
-    ).then((res) => res.json());
     const tokenSymbolAlias = tokenSymbolAliases[tokenSymbol] || tokenSymbol;
     const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
     const vaultAlias =
       vaultAliases[vaultAddress] || `${tokenSymbolAlias} Vault`;
-    const tokenIcon = _.get(tokenInfo, 'image.large');
-    const vaultIcon = vaultIcons[tokenSymbol];
+    const tokenIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${tokenAddress}/logo-128.png`;
+    const vaultIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${vaultAddress}/logo-128.png`;
     const vault = {
       address: vaultAddress,
       name: vaultName,
@@ -142,6 +120,7 @@ module.exports.handler = async () => {
       delegated: vaultInfo.isDelegatedArray[idx],
       timestamp: Date.now(),
     };
+    console.log(vault);
     await saveVault(vault);
     return vault;
   };

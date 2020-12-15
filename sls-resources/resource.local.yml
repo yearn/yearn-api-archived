@@ -35,3 +35,15 @@ Resources:
       AttributeDefinitions:
         - AttributeName: name
           AttributeType: S
+  DynamoDBTable4:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: holdings
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: address
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: address
+          AttributeType: S

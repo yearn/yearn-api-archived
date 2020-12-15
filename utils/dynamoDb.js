@@ -25,6 +25,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+require('dotenv').config();
 
 const options = {
   apiVersion: '2012-08-10',
