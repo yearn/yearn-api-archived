@@ -94,6 +94,20 @@ functions:
             description: >
               Currently the subgraph is indexing 8 out of 11 vaults. More vaults to be added later.
 
+  vaults-v2:
+    handler: services/vaults/v2/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+    events:
+      - http:
+          path: /vaults/v2
+          method: get
+          cors: true
+          documentation:
+            summary: Gets current v2 vaults from the Yearn subgraph v2
+            tags:
+              - Vaults
+
   vaults-addresses:
     handler: services/vaults/addresses/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
