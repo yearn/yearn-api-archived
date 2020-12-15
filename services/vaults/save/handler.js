@@ -14,26 +14,19 @@ const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
 const delayTime = 300;
 
-const tokenSymbolAliases = {
-  'yDAI+yUSDC+yUSDT+yTUSD': 'yCRV',
-  crvRenWSBTC: 'crvBTC',
-  'yDAI+yUSDC+yUSDT+yBUSD': 'crvBUSD',
-};
-
-const symbolAliases = {
-  'yyDAI+yUSDC+yUSDT+yTUSD': 'yUSD',
-};
-
-const vaultAliases = {
-  '0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c': 'yUSD Vault',
-};
-
 const fetchContractMetadata = async (address) => {
   const url = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}&apikey=${etherscanApiKey}`;
   const resp = await fetch(url).then((res) => res.json());
   const metadata = resp.result[0];
   await delay(delayTime);
   return metadata;
+};
+
+const fetchAliasMetadata = async () => {
+  const url =
+    'https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/aliases.json';
+  const resp = await fetch(url).then((res) => res.json());
+  return resp;
 };
 
 const fetchContractName = async (address) => {
@@ -85,18 +78,29 @@ module.exports.handler = async () => {
     const vaultContract = await getContract(vaultAddress);
     const vaultName = await callContractMethod(vaultContract, 'name');
     const vaultSymbol = await callContractMethod(vaultContract, 'symbol');
-    const tokenSymbol = vaultSymbol.substring(1);
     const tokenAddress = vaultInfo.tokenArray[idx];
+    const tokenContract = await getContract(tokenAddress);
     const tokenName = vaultName.substring(6);
     const decimals = parseInt(
       await callContractMethod(vaultContract, 'decimals'),
       10,
     );
 
-    const tokenSymbolAlias = tokenSymbolAliases[tokenSymbol] || tokenSymbol;
-    const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
-    const vaultAlias =
-      vaultAliases[vaultAddress] || `${tokenSymbolAlias} Vault`;
+    // const tokenSymbolAlias = tokenSymbolAliases[tokenSymbol] || tokenSymbol;
+    // const symbolAlias = symbolAliases[vaultSymbol] || `y${tokenSymbolAlias}`;
+
+    const aliasMetadata = await fetchAliasMetadata();
+
+    const vaultAliasMetadata = _.find(aliasMetadata, { address: vaultAddress });
+    const vaultSymbolAlias = _.get(vaultAliasMetadata, 'symbol');
+
+    const tokenAliasMetadata = _.find(aliasMetadata, { address: tokenAddress });
+    const tokenSymbolAlias = _.get(tokenAliasMetadata, 'symbol');
+
+    const tokenSymbol = await tokenContract.methods.symbol().call();
+
+    const vaultAlias = tokenSymbolAlias || tokenSymbol;
+
     const tokenIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${tokenAddress}/logo-128.png`;
     const vaultIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${vaultAddress}/logo-128.png`;
     const vault = {
@@ -105,7 +109,7 @@ module.exports.handler = async () => {
       vaultAlias,
       vaultIcon,
       symbol: vaultSymbol,
-      symbolAlias,
+      symbolAlias: vaultSymbolAlias,
       controllerAddress,
       controllerName: await fetchContractName(controllerAddress),
       strategyAddress,
@@ -113,7 +117,7 @@ module.exports.handler = async () => {
       tokenAddress,
       tokenName,
       tokenSymbol,
-      tokenSymbolAlias,
+      tokenSymbolAlias: vaultAlias,
       tokenIcon,
       decimals,
       wrapped: vaultInfo.isWrappedArray[idx],
