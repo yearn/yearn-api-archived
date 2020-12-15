@@ -4,5 +4,6 @@
 "useTabs": false,
 "semi": true,
 "singleQuote": true,
-"trailingComma": "all"
+"trailingComma": "all",
+"auto_format_on_save": true
 }
