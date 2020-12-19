@@ -12,8 +12,8 @@
   - Subtract USDT, USDC, and aLINK strategy since they all feed to 3pool. LINK doesn't have a separate strategy.
 - **Total Vault Holdings**
   - Sum up Vault Holdings in USD.
-  - Substract Strategy holdings (in USD) for ETH, DAI, and TUSD since all are in yCRV Vault.
-  - Subtract Strategy holdings (in USD) for aLINK, USDC, and USDT and subtract Vault Holdings for LINK since these are all in the 3pool Vault.
+  - Subtract Strategy Holdings for ETH, DAI, and TUSD since all are in yCRV Vault.
+  - Subtract Strategy Holdings for aLINK, USDC, and USDT and subtract Vault Holdings for LINK since these are all in the 3pool Vault.
 - **Total Value Locked**
   - Start with Total Vault Holdings.
   - Add Total Earn Holdings.
