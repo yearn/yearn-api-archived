@@ -1,9 +1,8 @@
 {
-"printWidth": 80,
-"tabWidth": 2,
-"useTabs": false,
-"semi": true,
-"singleQuote": true,
-"trailingComma": "all",
-"auto_format_on_save": true
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all"
 }

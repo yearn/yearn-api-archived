@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../lib/handler');
 const dynamodb = require('../../../utils/dynamoDb');
 // const _ = require('lodash');
 
@@ -20,17 +21,9 @@ const getVaultsApy = async () => {
   return apy;
 };
 
-exports.getVaultsApy = getVaultsApy;
+module.exports.getVaultsApy = getVaultsApy;
 
-exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const apy = await getVaultsApy();
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(apy),
-  };
-  return response;
-};
+  return apy;
+});

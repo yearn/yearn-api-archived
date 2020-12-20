@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 const dynamodb = require('../../../../utils/dynamoDb');
 const _ = require('lodash');
 
@@ -14,7 +15,7 @@ const getRepos = async () => {
   return repos;
 };
 
-exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const repos = await getRepos();
   const contributorMap = {};
 
@@ -47,14 +48,7 @@ exports.handler = async () => {
   const contributorCount = _.size(contributors);
 
   const repoCount = _.size(repos);
+  const stats = { repoCount, commitCount, contributorCount };
 
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify({ repoCount, commitCount, contributorCount }),
-  };
-  return response;
-};
+  return stats;
+});

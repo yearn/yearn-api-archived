@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
 const Web3 = require('web3');
@@ -74,6 +75,8 @@ const getVirtualPrice = async (address, block) => {
     .call(undefined, block);
   return virtualPrice;
 };
+
+module.exports.getVirtualPrice = getVirtualPrice;
 
 const getPricePerFullShare = async (
   vaultContract,
@@ -256,7 +259,7 @@ const readVault = async (vault) => {
   return data;
 };
 
-const handler = async () => {
+module.exports.handler = handler(async () => {
   console.log('Fetching historical blocks');
   currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
   oneDayAgoBlock = (await blocks.getDate(oneDayAgo)).block;
@@ -273,15 +276,6 @@ const handler = async () => {
       vaultsWithApy.push(vaultWithApy);
     }
   }
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(vaultsWithApy),
-  };
-  return response;
-};
 
-module.exports = { getVirtualPrice, handler };
+  return vaultsWithApy;
+});

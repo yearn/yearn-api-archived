@@ -180,7 +180,7 @@ functions:
       - http:
           path: /vaults/holdings/save
           method: get
-  
+
   tvl:
     handler: services/tvl/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2

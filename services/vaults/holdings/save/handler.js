@@ -7,6 +7,7 @@ This is part of the TVL calculation defined here: https://hackmd.io/@dudesahn/Bk
 
 'use strict';
 
+const handler = require('../../../../lib/handler');
 require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
 const delay = require('delay');
@@ -20,7 +21,7 @@ const Web3 = require('web3');
 
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 
-const saveVault = async data => {
+const saveVault = async (data) => {
   const params = {
     TableName: 'holdings',
     Item: data,
@@ -28,11 +29,11 @@ const saveVault = async data => {
   await db
     .put(params)
     .promise()
-    .catch(err => console.log('err', err));
+    .catch((err) => console.log('err', err));
   console.log(`Saved ${data.name}`);
 };
 
-const readVault = async vault => {
+const readVault = async (vault) => {
   const {
     name,
     symbol,
@@ -49,7 +50,7 @@ const readVault = async vault => {
   try {
     const holdings = await getHoldings(vault);
     const priceFeed = await axios.get(
-      `https://api.coingecko.com/api/v3/coins/${  vault.price_id}`,
+      `https://api.coingecko.com/api/v3/coins/${vault.price_id}`,
     );
     console.log('Vault: ', name);
     const data = {
@@ -135,7 +136,7 @@ const readStaking = async () => {
   return stakingContract;
 };
 
-module.exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const vaultsWithHoldings = [];
   for (const vault of vaults) {
     const vaultWithHoldings = await readVault(vault);
@@ -149,13 +150,5 @@ module.exports.handler = async () => {
   const veCRVLocked = await readveCRV();
   vaultsWithHoldings.push(staked);
   vaultsWithHoldings.push(veCRVLocked);
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(vaultsWithHoldings),
-  };
-  return response;
-};
+  return vaultsWithHoldings;
+});

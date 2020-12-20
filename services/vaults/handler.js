@@ -1,7 +1,9 @@
 'use strict';
 
-const dynamodb = require('../../utils/dynamoDb');
+const handler = require('../../lib/handler');
 const _ = require('lodash');
+
+const dynamodb = require('../../utils/dynamoDb');
 const { injectDataIntoVaultAtKey } = require('../../utils/vaults');
 const { getVaultsApy } = require('../vaults/apy/handler');
 
@@ -16,9 +18,9 @@ const getVaults = async () => {
   return vaults;
 };
 
-exports.getVaults = getVaults;
+module.exports.getVaults = getVaults;
 
-exports.handler = async (event) => {
+module.exports.handler = handler(async (event) => {
   const allVaults = await getVaults();
   const queryParams = event.queryStringParameters;
   const showApy = _.get(queryParams, 'apy') === 'true';
@@ -32,13 +34,5 @@ exports.handler = async (event) => {
 
   const vaultsWithData = _.chain(allVaults).map(injectApy);
 
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(vaultsWithData),
-  };
-  return response;
-};
+  return vaultsWithData;
+});
