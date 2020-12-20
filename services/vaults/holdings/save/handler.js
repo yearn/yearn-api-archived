@@ -135,6 +135,41 @@ const readStaking = async () => {
   return stakingContract;
 };
 
+const getYsusdEarnHoldings = async () => {
+  const pool  = {
+    symbol: 'ySUSD',
+    address: '0xF61718057901F84C4eEC4339EF8f0D86D2B45600'
+  }
+  const poolMinABI = [
+    {
+      constant: true,
+      inputs: [],
+      name: 'calcPoolValueInToken',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256'
+        }
+      ],
+      payable: false,
+      stateMutability: 'view',
+      type: 'function'
+    }
+  ];
+  const poolContract = new web3.eth.Contract(poolMinABI, pool.address);
+  const _totalHoldings = (await poolContract.methods.calcPoolValueInToken().call()) / 1e18;
+  const ySusdHoldings = {
+    address: '0xF61718057901F84C4eEC4339EF8f0D86D2B45600',
+    symbol: 'ySUSD',
+    name: 'iearn ySUSD',
+    timestamp: Date.now(),
+    poolBalanceUSD:_totalHoldings
+  };
+  await saveVault(ySusdHoldings);
+  return ySusdHoldings;
+}
+
 module.exports.handler = async () => {
   const vaultsWithHoldings = [];
   for (const vault of vaults) {
@@ -147,8 +182,10 @@ module.exports.handler = async () => {
 
   const staked = await readStaking();
   const veCRVLocked = await readveCRV();
+  const ySusdHoldings = await getYsusdEarnHoldings();
   vaultsWithHoldings.push(staked);
   vaultsWithHoldings.push(veCRVLocked);
+  vaultsWithHoldings.push(ySusdHoldings);
   const response = {
     statusCode: 200,
     headers: {
