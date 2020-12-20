@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
 const _ = require('lodash');
@@ -18,7 +19,7 @@ const saveRepo = async (repo) => {
     .catch((err) => console.log('err', err));
 };
 
-module.exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const reposUrl =
     'https://api.github.com/orgs/iearn-finance/repos?per_page=100';
   const repos = await fetch(reposUrl).then((res) => res.json());
@@ -66,14 +67,5 @@ module.exports.handler = async () => {
   );
 
   _.each(reposWithContributors, saveRepo);
-
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(reposWithContributors),
-  };
-  return response;
-};
+  return reposWithContributors;
+});

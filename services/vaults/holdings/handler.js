@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../lib/handler');
 const dynamodb = require('../../../utils/dynamoDb');
 // const _ = require('lodash');
 
@@ -12,7 +13,7 @@ const getVaultsHoldings = async () => {
   const entries = await db.scan(params).promise();
   const holdings = entries.Items;
 
-/*   const injectVaultAddress = (vault) => {
+  /*   const injectVaultAddress = (vault) => {
     vault.vaultAddress = vault.address;
     return vault;
   };
@@ -20,17 +21,9 @@ const getVaultsHoldings = async () => {
   return holdings;
 };
 
-exports.getVaultsHoldings = getVaultsHoldings;
+module.exports.getVaultsHoldings = getVaultsHoldings;
 
-exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const holdings = await this.getVaultsHoldings();
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(holdings),
-  };
-  return response;
-};
+  return holdings;
+});

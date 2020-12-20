@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 require('dotenv').config();
 const vaultsConfig = require('./vaults');
 const fetch = require('node-fetch');
@@ -10,25 +11,6 @@ const Web3 = require('web3');
 
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-
-module.exports.handler = async (event) => {
-  const userAddress = event.pathParameters.userAddress;
-
-  const activityData = await getActivityData(userAddress);
-  const earningsPerVaultData = await buildEarningsPerVaultData(
-    userAddress,
-    activityData,
-  );
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(earningsPerVaultData),
-  };
-};
 
 async function getActivityData(address) {
   const query = `
@@ -301,3 +283,15 @@ function getMinimalVaultABI() {
     },
   ];
 }
+
+module.exports.handler = handler(async (event) => {
+  const userAddress = event.pathParameters.userAddress;
+
+  const activityData = await getActivityData(userAddress);
+  const earningsPerVaultData = await buildEarningsPerVaultData(
+    userAddress,
+    activityData,
+  );
+
+  return earningsPerVaultData;
+});
