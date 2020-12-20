@@ -8,6 +8,7 @@ This is part of the TVL calculation defined here: https://hackmd.io/@dudesahn/Bk
 'use strict';
 
 require('dotenv').config();
+
 const dynamodb = require('../../../../utils/dynamoDb');
 const delay = require('delay');
 const vaults = require('./vaults');
@@ -135,6 +136,7 @@ const readStaking = async () => {
   return stakingContract;
 };
 
+// fetching iearn ySUSD product. This is not used on onany vailt, so I'm pulling this in the holdings endpoint as a new item in the output json
 const getYsusdEarnHoldings = async () => {
   const pool  = {
     symbol: 'ySUSD',
