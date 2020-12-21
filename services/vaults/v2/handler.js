@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 const subgraphUrl =
   'https://api.thegraph.com/subgraphs/name/salazarguille/yearn-vaults-v2-subgraph-rinkeby';
 
-const getGraphData = async () => {
+const getVaultsV2 = async () => {
   const query = `
   {
   vaults {
@@ -47,11 +47,13 @@ const getGraphData = async () => {
     body: JSON.stringify({ query }),
   });
   const responseJson = await response.json();
-  const graphData = responseJson.data;
-  return graphData;
+  const data = responseJson.data;
+  return data.vaults;
 };
 
+module.exports.getVaultsV2 = getVaultsV2;
+
 module.exports.handler = handler(async () => {
-  const graphData = await getGraphData();
-  return graphData;
+  const vaults = await getVaultsV2();
+  return vaults;
 });
