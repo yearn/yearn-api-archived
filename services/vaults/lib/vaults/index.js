@@ -4,8 +4,9 @@ const fetch = require('node-fetch');
 
 module.exports.v1 = require('./v1');
 module.exports.v2 = require('./v2');
+module.exports.roi = require('./roi');
 
-const getActivationBlock = async (vaultAddress) => {
+const getInceptionBlock = async (vaultAddress) => {
   const params = new URLSearchParams();
   params.append('module', 'account');
   params.append('action', 'txlist');
@@ -19,4 +20,4 @@ const getActivationBlock = async (vaultAddress) => {
   return result.blockNumber;
 };
 
-module.exports.getActivationBlock = getActivationBlock;
+module.exports.getInceptionBlock = getInceptionBlock;
