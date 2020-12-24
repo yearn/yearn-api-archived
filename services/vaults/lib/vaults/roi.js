@@ -1,9 +1,18 @@
 'use strict';
 
 const Web3 = require('web3');
-const mininmalABI = require('../../../../abi/vaultV1.json');
 
 const web3 = new Web3(process.env.ARCHIVENODE_ENDPOINT);
+
+const ABI_MAP = {
+  v1: require('../../../../abi/vaultV1.json'),
+  v2: require('../../../../abi/vaultV2.json'),
+};
+
+const PPFS_MAP = {
+  v1: 'getPricePerFullShare',
+  v2: 'pricePerShare',
+};
 
 module.exports.fetchBlockStats = async () => {
   const blocksPerMinute = 4;
@@ -37,16 +46,16 @@ module.exports.getVaultApy = async (vault, blockStats) => {
   const { currentBlock, oneMonthAgoBlock, blocksPerDay } = blockStats;
   const { inceptionBlock, address } = vault;
 
-  const vaultContract = new web3.eth.Contract(mininmalABI, address);
-  const { getPricePerFullShare } = vaultContract.methods;
+  const vaultContract = new web3.eth.Contract(ABI_MAP[vault.type], address);
+  const pricePerShare = vaultContract.methods[PPFS_MAP[vault.type]];
 
   const getPrice = async (block, fallback) => {
     if (block) {
       return block > inceptionBlock
-        ? await getPricePerFullShare().call(undefined, block)
+        ? await pricePerShare().call(undefined, block)
         : fallback;
     }
-    return await getPricePerFullShare().call();
+    return await pricePerShare().call();
   };
 
   const currentPricePerFullShare = await getPrice();
