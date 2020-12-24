@@ -1,24 +1,13 @@
 'use strict';
 
+const handler = require('../../../lib/handler');
 require('dotenv').config();
 const fetch = require('node-fetch');
 
 const subgraphUrl =
   'https://api.thegraph.com/subgraphs/name/salazarguille/yearn-vaults-v2-subgraph-rinkeby';
 
-module.exports.handler = async () => {
-  const graphData = await getGraphData();
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(graphData),
-  };
-};
-
-const getGraphData = async () => {
+const getVaultsV2 = async () => {
   const query = `
   {
   vaults {
@@ -58,6 +47,13 @@ const getGraphData = async () => {
     body: JSON.stringify({ query }),
   });
   const responseJson = await response.json();
-  const graphData = responseJson.data;
-  return graphData;
+  const data = responseJson.data;
+  return data.vaults;
 };
+
+module.exports.getVaultsV2 = getVaultsV2;
+
+module.exports.handler = handler(async () => {
+  const vaults = await getVaultsV2();
+  return vaults;
+});

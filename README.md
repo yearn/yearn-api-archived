@@ -25,6 +25,7 @@ git clone https://github.com/yearn-integrations/yearn-api.git
 ```
 
 - Pick an example environment file to use:
+
   - .sample.env.local - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
   - .sample.env.dev - uses dynamodb in AWS with credentials (use your own or ask x48 for read-only keys)
 
@@ -32,7 +33,7 @@ git clone https://github.com/yearn-integrations/yearn-api.git
 
 ```
 cd yearn-api
-cp .sample.env.local .env
+cp .sample.dev.env .env
 ```
 
 - Start the docker container

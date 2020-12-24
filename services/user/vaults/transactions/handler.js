@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 require('dotenv').config();
 const fetch = require('node-fetch');
 const { pluck, uniq } = require('ramda/dist/ramda');
@@ -7,19 +8,6 @@ const { getVaults } = require('../../../vaults/handler');
 const _ = require('lodash');
 
 const subgraphUrl = process.env.SUBGRAPH_ENDPOINT;
-
-module.exports.handler = async (event) => {
-  const userAddress = event.pathParameters.userAddress;
-  const transactions = await getTransactions(userAddress);
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(transactions),
-  };
-};
 
 const getGraphTransactions = async (userAddress) => {
   const query = `
@@ -180,3 +168,9 @@ function stripUnneededTransferFields(transfer) {
 module.exports.getTransactions = getTransactions;
 
 module.exports.getVaultAddressesForUser = getVaultAddressesForUser;
+
+module.exports.handler = handler(async (event) => {
+  const userAddress = event.pathParameters.userAddress;
+  const transactions = await getTransactions(userAddress);
+  return transactions;
+});

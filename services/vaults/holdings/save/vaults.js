@@ -2,7 +2,6 @@
 
 const config = require('./config.js');
 
-
 module.exports = [
   {
     id: 'CRV',
@@ -23,7 +22,7 @@ module.exports = [
     lastMeasurement: 10559448,
     measurement: 1e18,
     price_id: 'curve-fi-ydai-yusdc-yusdt-ytusd',
-  },  
+  },
   {
     id: 'vcDAI+cUSDC',
     name: 'yearn Curve.fi cDAI/cUSDC',
@@ -105,7 +104,7 @@ module.exports = [
     measurement: 1e18,
     depositDisabled: false,
     price_id: 'curve-fi-ydai-yusdc-yusdt-ytusd', // TODO: Update this when Coingecko adds token
-  },  
+  },
   {
     id: 'GUSD',
     name: 'GUSD',
@@ -125,7 +124,7 @@ module.exports = [
     lastMeasurement: 11039340,
     measurement: 1e18,
     depositDisabled: false,
-    price_id: 'gemini-dollar', 
+    price_id: 'gemini-dollar',
   },
   {
     id: 'ETH',
