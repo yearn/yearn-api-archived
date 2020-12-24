@@ -73,13 +73,17 @@ module.exports.getVaultApy = async (vault, blockStats) => {
   try {
     const currentPricePerFullShare = await getPrice();
     return Object.fromEntries(
-      await Promise.all(
-        timeframes.map(async (current, i) => {
+      await timeframes
+        .map((current, i) => async (entries) => {
           try {
             const prev = i > 0 ? timeframes[i - 1] : null;
+
+            // get price in timeframe, falling back to prev price if timeframe
+            // is greater then the inception of this vault.
             current.price =
               current.price ||
               (await getPrice(current.block, prev ? prev.price : 1e18));
+
             const roi = calculateYearlyRoi(
               current.price,
               currentPricePerFullShare,
@@ -87,14 +91,15 @@ module.exports.getVaultApy = async (vault, blockStats) => {
               currentBlock,
               blocksPerDay,
             );
-            return [current.name, roi];
+            entries.push([current.name, roi]);
           } catch {
-            return [current.name, null];
+            entries.push([current.name, null]);
           }
-        }),
-      ),
+          return entries;
+        })
+        .reduce((p, fn) => p.then(fn), Promise.resolve([])),
     );
-  } catch {
+  } catch (e) {
     return Object.fromEntries(timeframes.map(({ name }) => [name, null]));
   }
 };
