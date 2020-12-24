@@ -3,17 +3,16 @@
 const _ = require('lodash');
 
 const Web3BatchCall = require('web3-batch-call');
+const delay = require('delay');
 
 const handler = require('../../../lib/handler');
-const delay = require('../../../lib/delay');
 
-const vaults = require('../lib/vaults');
+const vi = require('../lib/vaults');
 
 module.exports.handler = handler(async () => {
-  const v1Addresses = await vaults.v1.fetchAddresses();
-  const v2Addresses = await vaults.v2.fetchAddresses();
+  const v1Addresses = await vi.v1.fetchAddresses();
+  const v2Addresses = await vi.v2.fetchAddresses();
 
-  // TODO: ugly
   const provider = process.env.WEB3_ENDPOINT;
   const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 
@@ -29,19 +28,20 @@ module.exports.handler = handler(async () => {
     {
       namespace: 'v1',
       addresses: v1Addresses,
-      abi: vaults.v1.abi(),
+      abi: vi.v1.abi(),
       readMethods: [{ name: 'name' }, { name: 'symbol' }, { name: 'decimals' }],
     },
     {
       namespace: 'v2',
       addresses: v2Addresses,
-      abi: vaults.v2.abi(),
+      abi: vi.v2.abi(),
       readMethods: [{ name: 'name' }, { name: 'symbol' }, { name: 'decimals' }],
     },
   ];
 
+  // Vaults data
   const res = await batchCall.execute(contracts);
-  const data = _(res)
+  let vaults = _(res)
     .map(({ address, namespace: type, name, symbol, decimals }) => ({
       address,
       type,
@@ -51,12 +51,30 @@ module.exports.handler = handler(async () => {
     }))
     .value();
 
-  for (const vault of data) {
+  // Inception block
+  for (const vault of vaults) {
     const { address } = vault;
-    const activationBlock = await vaults.getActivationBlock(address);
+    const inceptionBlock = await vi.getInceptionBlock(address);
     await delay(300);
-    vault.activationBlock = activationBlock;
+    vault.inceptionBlock = inceptionBlock;
   }
 
-  return data;
+  // ROI
+  const blockStats = await vi.roi.fetchBlockStats();
+  vaults = await Promise.all(
+    vaults.map(async (vault) => {
+      let apy = {};
+      try {
+        apy = await vi.roi.getVaultApy(vault, blockStats);
+      } catch {
+        apy = {};
+      }
+      return {
+        ...vault,
+        apy,
+      };
+    }),
+  );
+
+  return vaults;
 });
