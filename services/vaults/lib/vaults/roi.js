@@ -49,6 +49,18 @@ module.exports.getVaultApy = async (vault, blockStats) => {
   const vaultContract = new web3.eth.Contract(ABI_MAP[vault.type], address);
   const pricePerShare = vaultContract.methods[PPFS_MAP[vault.type]];
 
+  const timeframes = [
+    {
+      name: 'inceptionSample',
+      block: inceptionBlock,
+      price: 1e18,
+    },
+    {
+      name: 'oneMonthSample',
+      block: oneMonthAgoBlock,
+    },
+  ];
+
   const getPrice = async (block, fallback) => {
     if (block) {
       return block > inceptionBlock
@@ -58,32 +70,31 @@ module.exports.getVaultApy = async (vault, blockStats) => {
     return await pricePerShare().call();
   };
 
-  const currentPricePerFullShare = await getPrice();
-
-  const inceptionPricePerFullShare = 1e18;
-  const inception = calculateYearlyRoi(
-    inceptionPricePerFullShare,
-    currentPricePerFullShare,
-    inceptionBlock,
-    currentBlock,
-    blocksPerDay,
-  );
-
-  const oneMonthAgoPricePerFullShare = await getPrice(
-    oneMonthAgoBlock,
-    inceptionPricePerFullShare,
-  );
-
-  const oneMonth = calculateYearlyRoi(
-    oneMonthAgoPricePerFullShare,
-    currentPricePerFullShare,
-    oneMonthAgoBlock,
-    currentBlock,
-    blocksPerDay,
-  );
-
-  return {
-    oneMonth,
-    inception,
-  };
+  try {
+    const currentPricePerFullShare = await getPrice();
+    return Object.fromEntries(
+      await Promise.all(
+        timeframes.map(async (current, i) => {
+          try {
+            const prev = i > 0 ? timeframes[i - 1] : null;
+            current.price =
+              current.price ||
+              (await getPrice(current.block, prev ? prev.price : 1e18));
+            const roi = calculateYearlyRoi(
+              current.price,
+              currentPricePerFullShare,
+              current.block,
+              currentBlock,
+              blocksPerDay,
+            );
+            return [current.name, roi];
+          } catch {
+            return [current.name, null];
+          }
+        }),
+      ),
+    );
+  } catch {
+    return Object.fromEntries(timeframes.map(({ name }) => [name, null]));
+  }
 };

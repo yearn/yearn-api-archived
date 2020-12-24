@@ -7,11 +7,11 @@ const delay = require('delay');
 
 const handler = require('../../../lib/handler');
 
-const vi = require('../lib/vaults');
+const vaultInterface = require('../lib/vaults');
 
 module.exports.handler = handler(async () => {
-  const v1Addresses = await vi.v1.fetchAddresses();
-  const v2Addresses = await vi.v2.fetchAddresses();
+  const v1Addresses = await vaultInterface.v1.fetchAddresses();
+  const v2Addresses = await vaultInterface.v2.fetchAddresses();
 
   const provider = process.env.WEB3_ENDPOINT;
   const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
@@ -28,13 +28,13 @@ module.exports.handler = handler(async () => {
     {
       namespace: 'v1',
       addresses: v1Addresses,
-      abi: vi.v1.abi(),
+      abi: vaultInterface.v1.abi(),
       readMethods: [{ name: 'name' }, { name: 'symbol' }, { name: 'decimals' }],
     },
     {
       namespace: 'v2',
       addresses: v2Addresses,
-      abi: vi.v2.abi(),
+      abi: vaultInterface.v2.abi(),
       readMethods: [{ name: 'name' }, { name: 'symbol' }, { name: 'decimals' }],
     },
   ];
@@ -54,18 +54,18 @@ module.exports.handler = handler(async () => {
   // Inception block
   for (const vault of vaults) {
     const { address } = vault;
-    const inceptionBlock = await vi.getInceptionBlock(address);
+    const inceptionBlock = await vaultInterface.getInceptionBlock(address);
     await delay(300);
     vault.inceptionBlock = inceptionBlock;
   }
 
   // ROI
-  const blockStats = await vi.roi.fetchBlockStats();
+  const blockStats = await vaultInterface.roi.fetchBlockStats();
   vaults = await Promise.all(
     vaults.map(async (vault) => {
       let apy = {};
       try {
-        apy = await vi.roi.getVaultApy(vault, blockStats);
+        apy = await vaultInterface.roi.getVaultApy(vault, blockStats);
       } catch {
         apy = {};
       }
