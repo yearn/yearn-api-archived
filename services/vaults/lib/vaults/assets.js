@@ -2,33 +2,33 @@
 
 const fetch = require('node-fetch');
 
-const GHRAW = 'https://raw.githubusercontent.com';
-const GHAPI = 'https://api.github.com/repos';
+const GHRAW_URL = 'https://raw.githubusercontent.com';
+const GHAPI_URL = 'https://api.github.com/repos';
 
-const ALIASES = `${GHRAW}/iearn-finance/yearn-assets/master/icons/aliases.json`;
+const ALIASES_URL = `${GHRAW_URL}/iearn-finance/yearn-assets/master/icons/aliases.json`;
 
-const YEARN_ASSETS = `${GHAPI}/iearn-finance/yearn-assets/contents/icons/tokens`;
+const YEARN_ASSETS_URL = `${GHAPI_URL}/iearn-finance/yearn-assets/contents/icons/tokens`;
 const yearnAssetUrl = (address) =>
-  `${GHRAW}/iearn-finance/yearn-assets/master/icons/tokens/${address}/logo-128.png`;
+  `${GHRAW_URL}/iearn-finance/yearn-assets/master/icons/tokens/${address}/logo-128.png`;
 
-const TRUST_ASSETS = `${GHRAW}/trustwallet/assets/master/blockchains/ethereum/tokenlist.json`;
+const TRUST_ASSETS_URL = `${GHRAW_URL}/trustwallet/assets/master/blockchains/ethereum/tokenlist.json`;
 
 module.exports.fetchAliases = async () => {
-  const aliases = await fetch(ALIASES).then((res) => res.json());
+  const aliases = await fetch(ALIASES_URL).then((res) => res.json());
   return Object.fromEntries(
     aliases.map((alias) => [alias.address, alias.name]),
   );
 };
 
 const fetchYearnAssets = async () => {
-  const assets = await fetch(YEARN_ASSETS).then((res) => res.json());
+  const assets = await fetch(YEARN_ASSETS_URL).then((res) => res.json());
   return Object.fromEntries(
     assets.map(({ name: address }) => [address, yearnAssetUrl(address)]),
   );
 };
 
 const fetchTrustAssets = async () => {
-  const { tokens } = await fetch(TRUST_ASSETS).then((res) => res.json());
+  const { tokens } = await fetch(TRUST_ASSETS_URL).then((res) => res.json());
   return Object.fromEntries(
     tokens.map(({ address, logoURI }) => [address, logoURI]),
   );
