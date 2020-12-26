@@ -10,11 +10,44 @@ const erc20Abi = require('../../../abi/erc20.json');
 
 const vaultInterface = require('../lib/vaults');
 
+// FetchTokenDetails with a batch call to the ERC20 token addresses inside
+// each vault. Extracting name, symbol and decimals.
+const fetchTokenDetails = async (client, vaults) => {
+  const readMethods = [
+    { name: 'name' },
+    { name: 'symbol' },
+    { name: 'decimals' },
+  ];
+
+  const contracts = [
+    {
+      addresses: vaults.map(({ token }) => token.address),
+      abi: erc20Abi,
+      readMethods,
+    },
+  ];
+
+  const res = await client.execute(contracts);
+  return Object.fromEntries(res.map((token) => [token.address, token]));
+};
+
 // FetchTokenDetails with a batch call to all the available addresses for each
 // version. Extracting name, symbol, decimails and the token address.
 const fetchVaults = async (client) => {
-  const v1Addresses = await vaultInterface.v1.fetchAddresses();
-  const v2Addresses = await vaultInterface.v2.fetchAddresses();
+  let v1Addresses = await vaultInterface.v1.fetchAddresses();
+  let v2Addresses = await vaultInterface.v2.fetchAddresses();
+
+  const all = [...v1Addresses, ...v2Addresses];
+  const cachedVaultsMap = await vaultInterface.cache.fetchCachedVaults(all);
+
+  v1Addresses = v1Addresses.filter((address) => !cachedVaultsMap[address]);
+  v2Addresses = v2Addresses.filter((address) => !cachedVaultsMap[address]);
+
+  const cachedVaults = Object.values(cachedVaultsMap);
+
+  if ([...v1Addresses, ...v2Addresses].length === 0) {
+    return cachedVaults;
+  }
 
   const readMethods = [
     { name: 'name' },
@@ -37,9 +70,9 @@ const fetchVaults = async (client) => {
     },
   ];
 
-  // Vaults data
+  // Fetch new vaults data
   const res = await client.execute(contracts);
-  const vaults = res.map(
+  const newVaults = res.map(
     ({ address, namespace: type, name, symbol, decimals, token }) => ({
       address,
       type,
@@ -53,35 +86,24 @@ const fetchVaults = async (client) => {
   );
 
   // Inject inception block from etherscan
-  for (const vault of vaults) {
+  for (const vault of newVaults) {
     const { address } = vault;
     const inceptionBlock = await vaultInterface.getInceptionBlock(address);
     await delay(300);
     vault.inceptionBlock = inceptionBlock;
   }
 
-  return vaults;
-};
+  // Inject token details
+  const tokenDetails = await fetchTokenDetails(client, newVaults);
 
-// FetchTokenDetails with a batch call to the ERC20 token addresses inside
-// each vault. Extracting name, symbol and decimals.
-const fetchTokenDetails = async (client, vaults) => {
-  const readMethods = [
-    { name: 'name' },
-    { name: 'symbol' },
-    { name: 'decimals' },
-  ];
+  for (const vault of newVaults) {
+    vault.token = tokenDetails[vault.token.address];
+  }
 
-  const contracts = [
-    {
-      addresses: vaults.map(({ token }) => token.address),
-      abi: erc20Abi,
-      readMethods,
-    },
-  ];
+  // Cache new vaults
+  await vaultInterface.cache.saveNewVaults(newVaults);
 
-  const res = await client.execute(contracts);
-  return Object.fromEntries(res.map((token) => [token.address, token]));
+  return [...cachedVaults, ...newVaults];
 };
 
 module.exports.handler = handler(async () => {
@@ -97,6 +119,7 @@ module.exports.handler = handler(async () => {
     },
   });
 
+  // Vaults
   const vaults = await fetchVaults(batchClient);
 
   // ROI
@@ -111,18 +134,13 @@ module.exports.handler = handler(async () => {
     }),
   );
 
-  // Token details & Assets
-  const tokenDetails = await fetchTokenDetails(batchClient, vaults);
-
+  // Assets
   const assets = await vaultInterface.assets.fetchAssets();
   const aliases = await vaultInterface.assets.fetchAliases();
 
   for (const vault of vaults) {
-    vault.token = tokenDetails[vault.token.address];
-
     vault.token.displayName = aliases[vault.token.address] || vault.token.name;
     vault.token.icon = assets[vault.token.address] || null;
-
     vault.displayName = aliases[vault.address] || vault.name;
     vault.icon = assets[vault.address] || null;
   }

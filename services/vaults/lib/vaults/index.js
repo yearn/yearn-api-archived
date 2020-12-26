@@ -6,6 +6,7 @@ module.exports.v1 = require('./v1');
 module.exports.v2 = require('./v2');
 module.exports.roi = require('./roi');
 module.exports.assets = require('./assets');
+module.exports.cache = require('./cache');
 
 const getInceptionBlock = async (vaultAddress) => {
   const params = new URLSearchParams();
