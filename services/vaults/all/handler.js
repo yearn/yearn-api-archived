@@ -43,11 +43,11 @@ const fetchVaults = async (client) => {
     ({ address, namespace: type, name, symbol, decimals, token }) => ({
       address,
       type,
-      name: name[0].value,
-      symbol: symbol[0].value,
-      decimals: decimals[0].value,
+      name,
+      symbol,
+      decimals,
       token: {
-        address: token[0].value,
+        address: token,
       },
     }),
   );
@@ -71,6 +71,7 @@ const fetchTokenDetails = async (client, vaults) => {
     { name: 'symbol' },
     { name: 'decimals' },
   ];
+
   const contracts = [
     {
       addresses: vaults.map(({ token }) => token.address),
@@ -80,17 +81,7 @@ const fetchTokenDetails = async (client, vaults) => {
   ];
 
   const res = await client.execute(contracts);
-  return Object.fromEntries(
-    res.map(({ address, name, symbol, decimals }) => [
-      address,
-      {
-        address,
-        name: name[0].value,
-        symbol: symbol[0].value,
-        decimals: decimals[0].value,
-      },
-    ]),
-  );
+  return Object.fromEntries(res.map((token) => [token.address, token]));
 };
 
 module.exports.handler = handler(async () => {
@@ -99,6 +90,7 @@ module.exports.handler = handler(async () => {
 
   const batchClient = new Web3BatchCall({
     provider,
+    simplifyResponse: true,
     etherscan: {
       apiKey: etherscanApiKey,
       delay: 300,
