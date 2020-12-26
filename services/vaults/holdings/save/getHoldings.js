@@ -73,8 +73,39 @@ const getPoolTotalSupply = async poolAddress => {
   return _totalSupply;
 };
 
+const getEarnHoldings = async (pool) => {
+  const poolMinABI = [
+    {
+      constant: true,
+      inputs: [],
+      name: 'calcPoolValueInToken',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256'
+        }
+      ],
+      payable: false,
+      stateMutability: 'view',
+      type: 'function'
+    }
+  ];
+  const poolContract = new web3.eth.Contract(poolMinABI, pool.address);
+  const _totalHoldings = (await poolContract.methods.calcPoolValueInToken().call()) / 1e18;
+  const earnHoldings = {
+    address: pool.address,
+    symbol: pool.symbol,
+    name: pool.name,
+    timestamp: Date.now(),
+    poolBalanceUSD:_totalHoldings
+  };
+  /* await saveVault(earnHoldings); */
+  return earnHoldings;
+}
+
 const getHoldings = async vault => {
-  let poolBalance; let holdings;
+  let holdings;
   const { symbol, erc20address } = vault;
   const strategyAddress = await getVaultsStrategy(vault);
   const strategyContract = new web3.eth.Contract(
@@ -94,35 +125,13 @@ const getHoldings = async vault => {
       10,
       vault.strategyDecimals ? vault.strategyDecimals : vault.decimals,
     );
-  const pool = _.find(pools, { symbol });
-
-  if (pool) {
-    const currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
-    await delay(delayTime);
-    const poolAddress = pool.address;
-    const virtualPriceCurrent =
-      (await getVirtualPrice.getVirtualPrice(poolAddress, currentBlockNbr)) /
-      1e18;
-    const poolTotalSupply = await getPoolTotalSupply(erc20address);
-
-    poolBalance = poolTotalSupply * virtualPriceCurrent;
-    holdings = {
-      strategyAddress,
-      vaultHoldings,
-      strategyHoldings,
-      tokenSymbol: symbol,
-      tokenAddress: erc20address,
-      poolBalanceUSD: poolBalance,
-    };
-  } else {
     holdings = {
       strategyAddress,
       vaultHoldings,
       strategyHoldings,
     };
-  }
 
   return holdings;
 };
 
-module.exports = { getHoldings, getPoolTotalSupply };
+module.exports = { getHoldings, getPoolTotalSupply, getEarnHoldings };

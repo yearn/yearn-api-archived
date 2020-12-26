@@ -12,9 +12,10 @@ require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
 const delay = require('delay');
 const vaults = require('./vaults');
+const pools  = require('./earn');
 const { delayTime } = require('./config');
 const axios = require('axios');
-const { getHoldings, getPoolTotalSupply } = require('./getHoldings');
+const { getHoldings, getPoolTotalSupply, getEarnHoldings } = require('./getHoldings');
 
 const db = dynamodb.doc;
 const Web3 = require('web3');
@@ -54,6 +55,7 @@ const readVault = async vault => {
     );
     console.log('Vault: ', name);
     const data = {
+      type: 'vault',
       address,
       name,
       symbol,
@@ -65,6 +67,26 @@ const readVault = async vault => {
     await saveVault(data);
 
     return data;
+  } catch (e) {
+    console.log('error', e);
+    return e;
+  }
+};
+
+
+// get the holdings from an Earn product and store it in the DB.
+const readEarn = async pool => {
+
+  console.log(`Reading pool ${pool.name}`);
+  try {
+    let holdings = await getEarnHoldings(pool);
+    holdings = {
+      type: 'earn',
+      ...holdings
+    };
+    await saveVault(holdings);
+
+    return holdings;
   } catch (e) {
     console.log('error', e);
     return e;
@@ -136,44 +158,10 @@ const readStaking = async () => {
   return stakingContract;
 };
 
-// fetching iearn ySUSD product. This is not used on onany vailt, so I'm pulling this in the holdings endpoint as a new item in the output json
-const getYsusdEarnHoldings = async () => {
-  const pool  = {
-    symbol: 'ySUSD',
-    address: '0xF61718057901F84C4eEC4339EF8f0D86D2B45600'
-  }
-  const poolMinABI = [
-    {
-      constant: true,
-      inputs: [],
-      name: 'calcPoolValueInToken',
-      outputs: [
-        {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256'
-        }
-      ],
-      payable: false,
-      stateMutability: 'view',
-      type: 'function'
-    }
-  ];
-  const poolContract = new web3.eth.Contract(poolMinABI, pool.address);
-  const _totalHoldings = (await poolContract.methods.calcPoolValueInToken().call()) / 1e18;
-  const ySusdHoldings = {
-    address: '0xF61718057901F84C4eEC4339EF8f0D86D2B45600',
-    symbol: 'ySUSD',
-    name: 'iearn ySUSD',
-    timestamp: Date.now(),
-    poolBalanceUSD:_totalHoldings
-  };
-  await saveVault(ySusdHoldings);
-  return ySusdHoldings;
-}
 
 module.exports.handler = async () => {
   const vaultsWithHoldings = [];
+  //iterating over vaults to fetch Vault and Strategy holdings
   for (const vault of vaults) {
     const vaultWithHoldings = await readVault(vault);
     if (vaultWithHoldings !== null) {
@@ -181,13 +169,21 @@ module.exports.handler = async () => {
     }
     await delay(delayTime);
   }
+ //iterating over Earn products to fetch the earn holdings
+  for (const pool of pools) {
+    const earnWithHoldings = await readEarn(pool);
+    if (earnWithHoldings !== null) {
+      vaultsWithHoldings.push(earnWithHoldings);
+    }
+    await delay(delayTime);
+  }
 
   const staked = await readStaking();
   const veCRVLocked = await readveCRV();
-  const ySusdHoldings = await getYsusdEarnHoldings();
+/*   const ySusdHoldings = await getYsusdEarnHoldings(); */
   vaultsWithHoldings.push(staked);
   vaultsWithHoldings.push(veCRVLocked);
-  vaultsWithHoldings.push(ySusdHoldings);
+/*   vaultsWithHoldings.push(ySusdHoldings); */
   const response = {
     statusCode: 200,
     headers: {
