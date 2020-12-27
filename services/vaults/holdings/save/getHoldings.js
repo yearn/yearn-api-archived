@@ -73,8 +73,8 @@ const getPoolTotalSupply = async poolAddress => {
   return _totalSupply;
 };
 
-const getEarnHoldings = async (pool) => {
-  const poolMinABI = [
+const getEarnHoldings = async (earn) => {
+  const earnMinABI = [
     {
       constant: true,
       inputs: [],
@@ -91,12 +91,12 @@ const getEarnHoldings = async (pool) => {
       type: 'function'
     }
   ];
-  const poolContract = new web3.eth.Contract(poolMinABI, pool.address);
-  const _totalHoldings = (await poolContract.methods.calcPoolValueInToken().call()) / 1e18;
+  const poolContract = new web3.eth.Contract(earnMinABI, earn.address);
+  const _totalHoldings = (await poolContract.methods.calcPoolValueInToken().call()) / Math.pow(10,earn.decimals);
   const earnHoldings = {
-    address: pool.address,
-    symbol: pool.symbol,
-    name: pool.name,
+    address: earn.address,
+    symbol: earn.symbol,
+    name: earn.name,
     timestamp: Date.now(),
     poolBalanceUSD:_totalHoldings
   };
