@@ -93,11 +93,6 @@ exports.handler = async () => {
     stakedYFI +
     veCRV -
     doubleCountedVaults;
-    console.log('totalVaultHoldings:',totalVaultHoldings);
-    console.log('totalPoolBalanceUSD:', totalPoolBalanceUSD);
-    console.log('stakedYFI:', stakedYFI );
-    console.log('veCRV:', veCRV);
-    console.log('doubleCountedVaults:', doubleCountedVaults);
 
   const calculations = {
     totalVaultHoldings:

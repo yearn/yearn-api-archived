@@ -8,6 +8,7 @@ const Web3 = require('web3');
 const yRegistryAbi = require('../../../abi/yRegistry.json');
 const vaultAbi = require('../../../abi/vaultV5.json');
 const delay = require('delay');
+
 const db = dynamodb.doc;
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;

@@ -161,7 +161,7 @@ const readStaking = async () => {
 
 module.exports.handler = async () => {
   const vaultsWithHoldings = [];
-  //iterating over vaults to fetch Vault and Strategy holdings
+  // iterating over vaults to fetch Vault and Strategy holdings
   for (const vault of vaults) {
     const vaultWithHoldings = await readVault(vault);
     if (vaultWithHoldings !== null) {
@@ -169,7 +169,7 @@ module.exports.handler = async () => {
     }
     await delay(delayTime);
   }
- //iterating over Earn products to fetch the earn holdings
+ // iterating over Earn products to fetch the earn holdings
   for (const pool of pools) {
     const earnWithHoldings = await readEarn(pool);
     if (earnWithHoldings !== null) {
@@ -180,10 +180,9 @@ module.exports.handler = async () => {
 
   const staked = await readStaking();
   const veCRVLocked = await readveCRV();
-/*   const ySusdHoldings = await getYsusdEarnHoldings(); */
   vaultsWithHoldings.push(staked);
   vaultsWithHoldings.push(veCRVLocked);
-/*   vaultsWithHoldings.push(ySusdHoldings); */
+
   const response = {
     statusCode: 200,
     headers: {
