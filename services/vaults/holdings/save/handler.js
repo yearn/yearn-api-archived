@@ -21,27 +21,6 @@ const db = dynamodb.doc;
 const Web3 = require('web3');
 
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
-const infuraWeb3 = new Web3(web3);
-const getVirtualPrice = require('../../apy/save/handler');
-
-const pools = [
-  {
-    symbol: 'yCRV',
-    address: '0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51',
-  },
-  {
-    symbol: 'crvBUSD',
-    address: '0x79a8C46DeA5aDa233ABaFFD40F3A0A2B1e5A4F27',
-  },
-  {
-    symbol: 'crvBTC',
-    address: '0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714',
-  },
-  {
-    symbol: 'ySUSD',
-    address: '0xF61718057901F84C4eEC4339EF8f0D86D2B45600',
-  }
-];
 
 const saveVault = async data => {
   const params = {
@@ -158,28 +137,6 @@ const readveCRV = async () => {
   return veCRVContract;
 };
 
-const getEarnHoldings = async (pool) => {
-  const { symbol, erc20address } = pool;
-  const currentBlockNbr = await infuraWeb3.eth.getBlockNumber();
-  await delay(delayTime);
-  const poolAddress = pool.address;
-  const virtualPriceCurrent =
-    (await getVirtualPrice.getVirtualPrice(poolAddress, currentBlockNbr)) /
-    1e18;
-  console.log(virtualPriceCurrent);
-  const poolTotalSupply = await getPoolTotalSupply(poolAddress);
-
-  poolBalance = poolTotalSupply * virtualPriceCurrent;
-  earnHoldings = {
-    tokenSymbol: symbol,
-    tokenAddress: erc20address,
-    poolBalanceUSD: poolBalance,
-  };
-  return earnHoldings;
-};
-
-
-
 // getting YFI staked in GOV for the holdings endpoint
 const readStaking = async () => {
   const staked = await getPoolTotalSupply(
@@ -220,7 +177,6 @@ module.exports.handler = async () => {
     }
     await delay(delayTime);
   }
-
 
   const staked = await readStaking();
   const veCRVLocked = await readveCRV();
