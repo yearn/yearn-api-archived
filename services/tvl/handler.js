@@ -103,10 +103,11 @@ exports.handler = async () => {
     totalVaultHoldings:
       'Sum of vaultHoldings from Holdings endpoint - DAI.strategyHoldings - WETH.strategyHoldings - TUSD.strategyHoldings - aLINK.strategyHoldings - USDT.strategyHoldings - USDC.strategyHoldings - LINK.vaultHoldings',
     tvl:
-      'totalVaultHoldings + yCRV.poolBalance + crvBUSD.poolBalance + yWBTC.balance + YFI.staking + veCRV.veVRCLocked - yCRV.vaultHoldings - crvBUSD.vaultHoldings - YFI.vaultHoldings',
+      'totalVaultHoldings + yCRV.poolBalanceUSD + crvBUSD.poolBalanceUSD + yWBTC.PoolbalanceUSD + YFI.stakdYFI + veCRV.veVRCLocked - yCRV.vaultHoldings - crvBUSD.vaultHoldings - YFI.vaultHoldings',
   };
   const output = {
     TvlUSD: tvl,
+    earnHoldings: totalPoolBalanceUSD,
     timestamp: Date.now(),
     calculations,
   };
