@@ -36,8 +36,40 @@ const getVaultsStrategy = async vault => {
 };
 
 
+const getEarnHoldings = async (earn) => {
+  const earnMinABI = [
+    {
+      constant: true,
+      inputs: [],
+      name: 'calcPoolValueInToken',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256'
+        }
+      ],
+      payable: false,
+      stateMutability: 'view',
+      type: 'function'
+    }
+  ];
+  const poolContract = new web3.eth.Contract(earnMinABI, earn.address);
+  const _totalHoldings = (await poolContract.methods.calcPoolValueInToken().call()) / Math.pow(10,earn.decimals);
+  const earnHoldings = {
+    address: earn.address,
+    symbol: earn.symbol,
+    name: earn.name,
+    timestamp: Date.now(),
+    poolBalanceUSD:_totalHoldings
+  };
+  /* await saveVault(earnHoldings); */
+  return earnHoldings;
+}
+
 const getHoldings = async vault => {
   let holdings;
+  const { symbol, erc20address } = vault;
   const strategyAddress = await getVaultsStrategy(vault);
   const strategyContract = new web3.eth.Contract(
     strategyMinABI,
@@ -56,15 +88,13 @@ const getHoldings = async vault => {
       10,
       vault.strategyDecimals ? vault.strategyDecimals : vault.decimals,
     );
-
     holdings = {
       strategyAddress,
       vaultHoldings,
       strategyHoldings,
     };
 
-
   return holdings;
 };
 
-module.exports = { getHoldings };
+module.exports = { getHoldings, getPoolTotalSupply, getEarnHoldings };
