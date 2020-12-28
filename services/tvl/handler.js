@@ -23,6 +23,7 @@ exports.handler = async () => {
   let veCRV = 0;
   let doubleCountedVaults = 0;
   let holding;
+  /* console.log(holdings); */
   // eslint-disable-next-line no-restricted-syntax
   for (holding in holdings) {
     if (holding) {
@@ -55,10 +56,9 @@ exports.handler = async () => {
       }
 
       // calculating Total earn products (poolBalanceUSD) as in the link: https://hackmd.io/@dudesahn/BkxKfTzqw#Totals-reasoning-above-in-%E2%80%9CCalculating-Totals-Avoiding-Double-Counting%E2%80%9D
-      if (holdings[holding].holdings) {
-        if ('poolBalanceUSD' in holdings[holding].holdings) {
-          /* console.log('poolBalanceUSD: ', holdings[holding].holdings.poolBalanceUSD); */
-          totalPoolBalanceUSD += holdings[holding].holdings.poolBalanceUSD;
+      if (holdings[holding]) {
+        if ('poolBalanceUSD' in holdings[holding]) {
+          totalPoolBalanceUSD += holdings[holding].poolBalanceUSD;
         }
       }
 
@@ -93,6 +93,11 @@ exports.handler = async () => {
     stakedYFI +
     veCRV -
     doubleCountedVaults;
+    console.log('totalVaultHoldings:',totalVaultHoldings);
+    console.log('totalPoolBalanceUSD:', totalPoolBalanceUSD);
+    console.log('stakedYFI:', stakedYFI );
+    console.log('veCRV:', veCRV);
+    console.log('doubleCountedVaults:', doubleCountedVaults);
 
   const calculations = {
     totalVaultHoldings:
