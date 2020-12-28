@@ -16,6 +16,7 @@ const pools  = require('./earn');
 const { delayTime } = require('./config');
 const axios = require('axios');
 const { getHoldings, getPoolTotalSupply, getEarnHoldings } = require('./getHoldings');
+const oracle = require('../../../../utils/priceFeed');
 
 const db = dynamodb.doc;
 const Web3 = require('web3');
@@ -50,9 +51,12 @@ const readVault = async vault => {
   }
   try {
     const holdings = await getHoldings(vault);
-    const priceFeed = await axios.get(
+    let priceFeed = 0;
+    if (vault.price_id){
+    priceFeed = await axios.get(
       `https://api.coingecko.com/api/v3/coins/${  vault.price_id}`,
     );
+    }
     console.log('Vault: ', name);
     const data = {
       type: 'vault',

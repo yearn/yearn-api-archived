@@ -79,7 +79,7 @@ const getEarnHoldings = async (earn) => {
     timestamp: Date.now(),
     poolBalanceUSD:_totalHoldings
   };
-  /* await saveVault(earnHoldings); */
+
   return earnHoldings;
 }
 
