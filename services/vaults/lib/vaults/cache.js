@@ -10,6 +10,11 @@ module.exports.fetchCachedVaults = async (addresses) => {
   return Object.fromEntries(cached.map((vault) => [vault.address, vault]));
 };
 
-module.exports.saveNewVaults = async (vaults) => {
+module.exports.fetchAllCachedVaults = async () => {
+  const cached = await db.scan(VAULT_TABLE);
+  return cached;
+};
+
+module.exports.cacheVaults = async (vaults) => {
   await db.batchSet(VAULT_TABLE, vaults);
 };
