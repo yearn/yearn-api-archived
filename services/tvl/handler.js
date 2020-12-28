@@ -108,6 +108,7 @@ exports.handler = async () => {
   const output = {
     TvlUSD: tvl,
     earnHoldings: totalPoolBalanceUSD,
+    vaultHoldings: totalVaultHoldings,
     timestamp: Date.now(),
     calculations,
   };
