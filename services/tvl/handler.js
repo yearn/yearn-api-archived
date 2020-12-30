@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../lib/handler');
 const dynamodb = require('../../utils/dynamoDb');
 
 const db = dynamodb.doc;
@@ -14,7 +15,7 @@ const getHoldings = async () => {
   return holdings;
 };
 
-exports.handler = async () => {
+module.exports.handler = handler(async () => {
   let tvl = 0;
   const holdings = await getHoldings();
   let totalVaultHoldings = 0;
@@ -106,13 +107,5 @@ exports.handler = async () => {
     calculations,
   };
 
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(output),
-  };
-  return response;
-};
+  return output;
+});
