@@ -78,6 +78,32 @@ functions:
               type: 'boolean'
               required: false
 
+  vaults-all:
+    handler: services/vaults/all/handler.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    timeout: 30
+    events:
+      - http:
+          path: /vaults/all
+          method: get
+          cors: true
+          documentation:
+            summary: Gets all vaults (all versions) from the vault registry
+            tags:
+              - Vaults
+            description: >
+              V1 vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0).
+              V2 vaults are pulled from thegraph (https://api.thegraph.com/subgraphs/name/salazarguille/yearn-vaults-v2-subgraph-rinkeby).
+
+  vaults-all-job:
+    handler: services/vaults/all/job.handler
+    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
+    events:
+      - http:
+          path: /vaults/all/job
+          method: get
+          cors: true
+
   vaults-snapshots:
     handler: services/vaults/snapshots/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
@@ -180,7 +206,7 @@ functions:
       - http:
           path: /vaults/holdings/save
           method: get
-  
+
   tvl:
     handler: services/tvl/handler.handler
     role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2

@@ -1,13 +1,17 @@
 'use strict';
 
+const handler = require('../../../lib/handler');
 require('dotenv').config();
+
 const _ = require('lodash');
-const dynamodb = require('../../../utils/dynamoDb');
 const fetch = require('node-fetch');
 const Web3 = require('web3');
+const delay = require('delay');
+
+const dynamodb = require('../../../utils/dynamoDb');
 const yRegistryAbi = require('../../../abi/yRegistry.json');
 const vaultAbi = require('../../../abi/vaultV5.json');
-const delay = require('delay');
+
 const db = dynamodb.doc;
 const web3 = new Web3(process.env.WEB3_ENDPOINT);
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
@@ -63,7 +67,7 @@ const saveVault = async (vault) => {
   console.log(`Saved ${vault.name}`);
 };
 
-module.exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const registryContract = new web3.eth.Contract(
     yRegistryAbi,
     yRegistryAddress,
@@ -138,13 +142,5 @@ module.exports.handler = async () => {
     vaults.push(vault);
   }
 
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(vaults),
-  };
-  return response;
-};
+  return vaults;
+});

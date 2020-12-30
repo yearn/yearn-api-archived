@@ -48,7 +48,7 @@ const poolMinABI = [
 
 const vaultStrategyMap = {};
 
-const getVaultsStrategy = async vault => {
+const getVaultsStrategy = async (vault) => {
   // Populate vault->strategy mapping if first time here to reuse of future calls.
   if (_.isEmpty(vaultStrategyMap)) {
     const registryContract = new web3.eth.Contract(
@@ -67,14 +67,15 @@ const getVaultsStrategy = async vault => {
   return vaultStrategyMap[vault.vaultContractAddress];
 };
 
-const getPoolTotalSupply = async poolAddress => {
+const getPoolTotalSupply = async (poolAddress) => {
   const poolContract = new web3.eth.Contract(poolMinABI, poolAddress);
   const _totalSupply = (await poolContract.methods.totalSupply().call()) / 1e18;
   return _totalSupply;
 };
 
-const getHoldings = async vault => {
-  let poolBalance; let holdings;
+const getHoldings = async (vault) => {
+  let poolBalance;
+  let holdings;
   const { symbol, erc20address } = vault;
   const strategyAddress = await getVaultsStrategy(vault);
   const strategyContract = new web3.eth.Contract(

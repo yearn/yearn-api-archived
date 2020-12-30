@@ -1,11 +1,12 @@
 'use strict';
 
+const handler = require('../../../lib/handler');
 const dynamodb = require('../../../utils/dynamoDb');
 const _ = require('lodash');
 
 const db = dynamodb.doc;
 
-module.exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const params = {
     TableName: 'vaultApy',
   };
@@ -43,13 +44,5 @@ module.exports.handler = async () => {
     lendRates: fixedLendRates,
   };
 
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(loanScanResponse),
-  };
-  return response;
-};
+  return loanScanResponse;
+});
