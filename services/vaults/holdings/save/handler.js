@@ -12,12 +12,13 @@ require('dotenv').config();
 const dynamodb = require('../../../../utils/dynamoDb');
 const delay = require('delay');
 const vaults = require('./vaults');
-const pools  = require('./earn');
+const earns  = require('./earn');
+const pools = require('./pools');
 const { delayTime } = require('./config');
-const axios = require('axios');
 const { getHoldings, getPoolTotalSupply, getEarnHoldings } = require('./getHoldings');
 const oracle = require('../../../../utils/priceFeed');
-
+const getVirtualPrice = require('../../apy/save/handler');
+const _ = require('lodash');
 const db = dynamodb.doc;
 const Web3 = require('web3');
 
@@ -52,19 +53,56 @@ const readVault = async vault => {
   try {
     const holdings = await getHoldings(vault);
     let priceFeed = 0;
-    if (vault.price_id){
-    priceFeed = await axios.get(
-      `https://api.coingecko.com/api/v3/coins/${  vault.price_id}`,
-    );
+
+    // calling virtual price for Curve tokens
+    if (
+        vault.symbol === 'yCRV' ||
+        vault.symbol === 'yvmusd3CRV' ||
+        vault.symbol === 'yvgusd3CRV' ||
+        vault.symbol=== 'yvcDAI+cUSDC' ||
+        vault.symbol === 'crvBUSD' ||
+        vault.symbol === 'crvBTC' ||
+        vault.symbol === '3Crv'
+    ){
+      const symbol = vault.symbol;
+      const pool = _.find(pools, { symbol });
+      const currentBlockNbr = await web3.eth.getBlockNumber();
+      const virtualPriceCurrent = await getVirtualPrice.getVirtualPrice(
+        pool.address,
+        currentBlockNbr,
+      );
+
+      priceFeed = virtualPriceCurrent / 1e18;
     }
+    // setting price_usd to 1 for TUSD, USDC, USDT, DAI
+    if (
+      vault.symbol === 'TUSD' ||
+      vault.symbol === 'USDC' ||
+      vault.symbol === 'GUSD' ||
+      vault.symbol === 'USDT' ||
+      vault.symbol === 'DAI' ||
+      vault.symbol === 'aLINK'
+    ){
+      priceFeed = 1;
+    
+    }
+    // get price from uniquote oracle
+    if (
+      vault.symbol === 'YFI' ||
+      vault.symbol === 'WETH' ||
+      vault.symbol === 'LINK'
+    ){
+      priceFeed = await oracle.getPrice(vault.symbol);
+
+    }
+
     console.log('Vault: ', name);
     const data = {
       type: 'vault',
       address,
       name,
       symbol,
-      price_id,
-      price_usd: priceFeed.data.market_data.current_price.usd,
+      price_usd: priceFeed,
       timestamp: Date.now(),
       holdings,
     };
@@ -125,15 +163,13 @@ const readveCRV = async () => {
   const voterAddress = '0xF147b8125d2ef93FB6965Db97D6746952a133934';
   const veCRVLocked =
     (await poolContract.methods.balanceOf(voterAddress).call()) / 1e18;
-  const priceFeed = await axios.get(
-    'https://api.coingecko.com/api/v3/coins/curve-dao-token',
-  );
+  const priceFeed =  await oracle.getPrice('CRV');
+
   const veCRVContract = {
     address: '0x5f3b5dfeb7b28cdbd7faba78963ee202a494e2a2',
     name: 'veCRV',
     symbol: 'veCRV',
-    price_id: 'curve-dao-token',
-    price_usd: priceFeed.data.market_data.current_price.usd,
+    price_usd: priceFeed,
     timestamp: Date.now(),
     veCRVLocked,
   };
@@ -146,15 +182,13 @@ const readStaking = async () => {
   const staked = await getPoolTotalSupply(
     '0xBa37B002AbaFDd8E89a1995dA52740bbC013D992',
   );
-  const priceFeed = await axios.get(
-    'https://api.coingecko.com/api/v3/coins/yearn-finance',
-  );
+  const priceFeed =  await oracle.getPrice('YFI');
+
   const stakingContract = {
     address: '0xBa37B002AbaFDd8E89a1995dA52740bbC013D992',
     name: 'staked YFI',
     symbol: 'YFI',
-    price_id: 'yearn-finance',
-    price_usd: priceFeed.data.market_data.current_price.usd,
+    price_usd: priceFeed,
     timestamp: Date.now(),
     stakedYFI: staked,
   };
@@ -174,8 +208,8 @@ module.exports.handler = async () => {
     await delay(delayTime);
   }
  // iterating over Earn products to fetch the earn holdings
-  for (const pool of pools) {
-    const earnWithHoldings = await readEarn(pool);
+  for (const earn of earns) {
+    const earnWithHoldings = await readEarn(earn);
     if (earnWithHoldings !== null) {
       vaultsWithHoldings.push(earnWithHoldings);
     }

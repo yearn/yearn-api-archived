@@ -5,6 +5,45 @@ const config = require('./config.js');
 
 module.exports = [
   {
+    id: 'WETH',
+    name: 'WETH',
+    symbol: 'WETH',
+    description: 'Wrappeth Ether',
+    vaultSymbol: 'yWETH',
+    erc20address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    vaultContractAddress: '0xe1237aA7f535b0CC33Fd973D66cBf830354D16c7',
+    vaultContractABI: config.vaultContractV4ABI,
+    balance: 0,
+    vaultBalance: 0,
+    decimals: 18,
+    deposit: true,
+    depositAll: true,
+    withdraw: true,
+    withdrawAll: true,
+    lastMeasurement: 10774489,
+    measurement: 1e18,
+    depositDisabled: true
+  },
+  {
+    id: 'YFI',
+    name: 'yearn.finance',
+    symbol: 'YFI',
+    description: 'yearn.finance',
+    vaultSymbol: 'yYFI',
+    erc20address: '0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e',
+    vaultContractAddress: '0xBA2E7Fed597fd0E3e70f5130BcDbbFE06bB94fe1',
+    vaultContractABI: config.vaultContractV2ABI,
+    balance: 0,
+    vaultBalance: 0,
+    decimals: 18,
+    deposit: true,
+    depositAll: true,
+    withdraw: true,
+    withdrawAll: true,
+    lastMeasurement: 10695309,
+    measurement: 1e18
+  },
+  {
     id: 'CRV',
     name: 'curve.fi/y LP',
     symbol: 'yCRV',
@@ -21,8 +60,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18,
-    price_id: 'curve-fi-ydai-yusdc-yusdt-ytusd',
+    measurement: 1e18
   },
   {
     id: 'yvmusd3CRV',
@@ -30,7 +68,7 @@ module.exports = [
     symbol: 'yvmusd3CRV',
     description: 'musd/3Crv',
     vaultSymbol: 'yvmusd3CRV',
-    erc20address: '0x1aef73d49dedc4b1778d0706583995958dc862e6',
+    erc20address: '0x1AEf73d49Dedc4b1778d0706583995958Dc862e6',
     vaultContractAddress: '0x0FCDAeDFb8A7DfDa2e9838564c5A1665d856AFDF',
     vaultContractABI: config.vaultContractABI,
     balance: 0,
@@ -41,8 +79,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18,
-    price_id: null,
+    measurement: 1e18
   },  
   {
     id: 'yvgusd3CRV',
@@ -61,8 +98,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18,
-    price_id: null,
+    measurement: 1e18
   },  
   {
     id: 'vcDAI+cUSDC',
@@ -81,8 +117,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18,
-    price_id: 'lp-ccurve',
+    measurement: 1e18
   },
   {
     id: 'crvBUSD',
@@ -102,8 +137,7 @@ module.exports = [
     withdrawAll: true,
     depositDisabled: false,
     lastMeasurement: 10709740,
-    measurement: 1e18,
-    price_id: 'lp-bcurve',
+    measurement: 1e18
   },
   {
     id: 'crvBTC',
@@ -122,8 +156,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10734341,
-    measurement: 1e18,
-    price_id: 'lp-sbtc-curve',
+    measurement: 1e18
   },
   {
     id: '3Crv',
@@ -143,8 +176,7 @@ module.exports = [
     withdrawAll: true,
     lastMeasurement: 11039340,
     measurement: 1e18,
-    depositDisabled: false,
-    price_id: 'curve-fi-ydai-yusdc-yusdt-ytusd', // TODO: Update this when Coingecko adds token
+    depositDisabled: false
   },  
   {
     id: 'GUSD',
@@ -164,70 +196,7 @@ module.exports = [
     withdrawAll: true,
     lastMeasurement: 11039340,
     measurement: 1e18,
-    depositDisabled: false,
-    price_id: 'gemini-dollar', 
-  },
-  {
-    id: 'ETH',
-    name: 'ETH',
-    symbol: 'ETH',
-    description: 'Ether',
-    vaultSymbol: 'yETH',
-    erc20address: 'Ethereum',
-    vaultContractAddress: '0xe1237aA7f535b0CC33Fd973D66cBf830354D16c7',
-    vaultContractABI: config.vaultContractV4ABI,
-    balance: 0,
-    vaultBalance: 0,
-    decimals: 18,
-    deposit: true,
-    depositAll: false,
-    withdraw: true,
-    withdrawAll: true,
-    lastMeasurement: 10774489,
-    measurement: 1e18,
-    depositDisabled: true,
-    price_id: 'ethereum',
-  },
-  {
-    id: 'WETH',
-    name: 'WETH',
-    symbol: 'WETH',
-    description: 'Wrappeth Ether',
-    vaultSymbol: 'yWETH',
-    erc20address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-    vaultContractAddress: '0xe1237aA7f535b0CC33Fd973D66cBf830354D16c7',
-    vaultContractABI: config.vaultContractV4ABI,
-    balance: 0,
-    vaultBalance: 0,
-    decimals: 18,
-    deposit: true,
-    depositAll: true,
-    withdraw: true,
-    withdrawAll: true,
-    lastMeasurement: 10774489,
-    measurement: 1e18,
-    depositDisabled: true,
-    price_id: 'ethereum',
-  },
-  {
-    id: 'YFI',
-    name: 'yearn.finance',
-    symbol: 'YFI',
-    description: 'yearn.finance',
-    vaultSymbol: 'yYFI',
-    erc20address: '0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e',
-    vaultContractAddress: '0xBA2E7Fed597fd0E3e70f5130BcDbbFE06bB94fe1',
-    vaultContractABI: config.vaultContractV2ABI,
-    balance: 0,
-    vaultBalance: 0,
-    decimals: 18,
-    deposit: true,
-    depositAll: true,
-    withdraw: true,
-    withdrawAll: true,
-    lastMeasurement: 10695309,
-    measurement: 1e18,
-    price_id: 'yearn-finance',
+    depositDisabled: false 
   },
   {
     id: 'DAI',
@@ -246,8 +215,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10650116,
-    measurement: 1e18,
-    price_id: 'dai',
+    measurement: 1e18
   },
   {
     id: 'TUSD',
@@ -266,8 +234,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10603368,
-    measurement: 1e18,
-    price_id: 'true-usd',
+    measurement: 1e18
   },
   {
     id: 'USDC',
@@ -286,8 +253,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10532708,
-    measurement: 1e18,
-    price_id: 'usd-coin',
+    measurement: 1e18
   },
   {
     id: 'USDT',
@@ -306,8 +272,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10651402,
-    measurement: 1e18,
-    price_id: 'tether',
+    measurement: 1e18
   },
   {
     id: 'aLINK',
@@ -327,8 +292,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10599617,
-    measurement: 1e18,
-    price_id: 'aave-link',
+    measurement: 1e18
   },
   {
     id: 'LINK',
@@ -349,7 +313,6 @@ module.exports = [
     withdrawAll: true,
     depositDisabled: true,
     lastMeasurement: 10604016,
-    measurement: 1e18,
-    price_id: 'chainlink',
+    measurement: 1e18
   },
 ];
