@@ -113,7 +113,6 @@ exports.handler = async () => {
     TvlUSD: tvl,
     totalEarnHoldingsUSD: totalPoolBalanceUSD,
     totalVaultHoldingsUSD: totalVaultHoldings,
-    totalStrategyHoldingsUSD: totalStrategyHoldings,
     timestamp: Date.now(),
     calculations,
   };
