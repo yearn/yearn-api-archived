@@ -34,8 +34,10 @@ const calculateYearlyRoi = (
   previousBlock,
   currentBlock,
   blocksPerDay,
+  decimals,
 ) => {
-  const pricePerFullShareDelta = (currentValue - previousValue) / 1e18;
+  const pricePerFullShareDelta =
+    (currentValue - previousValue) / 10 ** decimals;
   const blockDelta = currentBlock - previousBlock;
   const dailyRoi = (pricePerFullShareDelta / blockDelta) * 100 * blocksPerDay;
   const yearlyRoi = dailyRoi * 365;
@@ -49,11 +51,15 @@ module.exports.getVaultApy = async (vault, blockStats) => {
   const vaultContract = new web3.eth.Contract(ABI_MAP[vault.type], address);
   const pricePerShare = vaultContract.methods[PPFS_MAP[vault.type]];
 
+  // v2 vaults `pricePerShare` works in relation to the decimals in the vault
+  const decimals =
+    vault.type === 'v2' ? parseInt(vault.decimals || '18', 10) : 18;
+
   const timeframes = [
     {
       name: 'inceptionSample',
       block: inceptionBlock,
-      price: 1e18,
+      price: 10 ** decimals,
     },
     {
       name: 'oneMonthSample',
@@ -82,7 +88,10 @@ module.exports.getVaultApy = async (vault, blockStats) => {
             // is greater then the inception of this vault.
             current.price =
               current.price ||
-              (await getPrice(current.block, prev ? prev.price : 1e18));
+              (await getPrice(
+                current.block,
+                prev ? prev.price : 10 ** decimals,
+              ));
 
             const roi = calculateYearlyRoi(
               current.price,
@@ -90,6 +99,7 @@ module.exports.getVaultApy = async (vault, blockStats) => {
               current.block,
               currentBlock,
               blocksPerDay,
+              decimals,
             );
             entries.push([current.name, roi]);
           } catch {
