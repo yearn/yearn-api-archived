@@ -15,7 +15,6 @@ const vaults = require('./vaults');
 const earns  = require('./earn');
 const pools = require('./pools');
 const { delayTime } = require('./config');
-const axios = require('axios');
 const { getHoldings, getPoolTotalSupply, getEarnHoldings } = require('./getHoldings');
 const oracle = require('../../../../utils/priceFeed');
 const getVirtualPrice = require('../../apy/save/handler');
@@ -68,13 +67,10 @@ const readVault = async vault => {
       const symbol = vault.symbol;
       const pool = _.find(pools, { symbol });
       const currentBlockNbr = await web3.eth.getBlockNumber();
-      console.log('current Block:', currentBlockNbr);
-      console.log ('pool addres:', pool.address);
       const virtualPriceCurrent = await getVirtualPrice.getVirtualPrice(
         pool.address,
         currentBlockNbr,
       );
-      console.log('virtual price:', virtualPriceCurrent);
 
       priceFeed = virtualPriceCurrent / 1e18;
     }
