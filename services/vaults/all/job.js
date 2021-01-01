@@ -28,7 +28,17 @@ const fetchTokenDetails = async (client, vaults) => {
   ];
 
   const res = await client.execute(contracts);
-  return Object.fromEntries(res.map((token) => [token.address, token]));
+  return Object.fromEntries(
+    res.map(({ address, name, symbol, decimals }) => [
+      address,
+      {
+        address,
+        name,
+        symbol,
+        decimals,
+      },
+    ]),
+  );
 };
 
 // FetchAllVaults with a batch call to all the available addresses for each
