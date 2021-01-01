@@ -1,8 +1,10 @@
 'use strict';
 
+require('dotenv').config();
 const Web3BatchCall = require('web3-batch-call');
 const delay = require('delay');
 
+const unix = require('../../../lib/timestamp');
 const handler = require('../../../lib/handler');
 const erc20Abi = require('../../../abi/erc20.json');
 
@@ -98,6 +100,13 @@ const fetchAllVaults = async (client) => {
     vault.token = tokenDetails[vault.token.address];
   }
 
+  const timestamp = unix();
+
+  // Add timestamps
+  for (const vault of newVaults) {
+    vault.created = timestamp;
+  }
+
   return [...newVaults, ...cachedVaults];
 };
 
@@ -132,13 +141,22 @@ module.exports.handler = handler(async () => {
 
   // Assets
   const assets = await vaultInterface.assets.fetchAssets();
-  const aliases = await vaultInterface.assets.fetchAliases();
+  const symbolAliases = await vaultInterface.assets.fetchSymbolAliases();
 
   for (const vault of vaults) {
-    vault.token.displayName = aliases[vault.token.address] || vault.token.name;
+    vault.token.displayName =
+      symbolAliases[vault.token.address] || vault.token.symbol;
+    vault.displayName = vault.token.displayName;
+
     vault.token.icon = assets[vault.token.address] || null;
-    vault.displayName = aliases[vault.address] || vault.name;
     vault.icon = assets[vault.address] || null;
+  }
+
+  const timestamp = unix();
+
+  // Add timestamps
+  for (const vault of vaults) {
+    vault.updated = timestamp;
   }
 
   // Cache updated & new vaults
