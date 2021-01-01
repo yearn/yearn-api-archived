@@ -13,10 +13,10 @@ const yearnAssetUrl = (address) =>
 
 const TRUST_ASSETS_URL = `${GHRAW_URL}/trustwallet/assets/master/blockchains/ethereum/tokenlist.json`;
 
-module.exports.fetchAliases = async () => {
+module.exports.fetchSymbolAliases = async () => {
   const aliases = await fetch(ALIASES_URL).then((res) => res.json());
   return Object.fromEntries(
-    aliases.map((alias) => [alias.address, alias.name]),
+    aliases.map((alias) => [alias.address, alias.symbol]),
   );
 };
 
