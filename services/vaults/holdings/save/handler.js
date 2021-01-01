@@ -44,8 +44,6 @@ const readVault = async (vault) => {
     symbol,
     vaultContractABI: abi,
     vaultContractAddress: address,
-    // eslint-disable-next-line camelcase
-    price_id,
   } = vault;
   console.log(`Reading vault ${vault.name}`);
   if (!abi || !address) {

@@ -217,7 +217,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Calculates YEARN TVL as defined here https://hackmd.io/@dudesahn/BkxKfTzqw#Totals-reasoning-above-in-%E2%80%9CCalculating-Totals-Avoiding-Double-Counting%E2%80%9D
+            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md 
             tags:
               - TVL
             description: >

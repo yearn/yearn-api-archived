@@ -97,7 +97,6 @@ const getHoldings = async vault => {
   const vaultHoldings =
     (await vaultContract.methods.balance().call()) /
     Math.pow(10, vault.decimals);
-    console.log('vaultHoldings', vaultHoldings);
   const strategyHoldings =
     (await strategyContract.methods.balanceOf().call()) /
     Math.pow(

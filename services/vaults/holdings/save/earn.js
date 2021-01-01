@@ -41,13 +41,13 @@ module.exports = [
     symbol: 'yUSDC',
     name: 'yUSDC v3',
     address: '0x26EA744E5B887E5205727f55dFBE8685e3b21951',
-    decimals: 18
+    decimals: 6
   },
   {
     symbol: 'yUSDT',
     name: 'yUSDT v3',
     address: '0xE6354ed5bC4b393a5Aad09f21c46E101e692d447',
-    decimals: 18
+    decimals: 6
   },
   {
     symbol: 'yBUSD',

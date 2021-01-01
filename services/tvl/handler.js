@@ -37,7 +37,6 @@ module.exports.handler = handler(async () => {
         totalStrategyHoldings +=
         holdings[holding].holdings.strategyHoldings *
         holdings[holding].price_usd;
-        console.log(totalStrategyHoldings);
         // removing strategy double counting.
         if (
           holdings[holding].name === 'DAI' ||
@@ -65,14 +64,14 @@ module.exports.handler = handler(async () => {
         }
       }
 
-      // calculating Total earn products (poolBalanceUSD) as in the link: https://hackmd.io/@dudesahn/BkxKfTzqw#Totals-reasoning-above-in-%E2%80%9CCalculating-Totals-Avoiding-Double-Counting%E2%80%9D
+      // calculating Total earn products (poolBalanceUSD) as in the link: services/tvl/readme.md
       if (holdings[holding]) {
         if ('poolBalanceUSD' in holdings[holding]) {
           totalPoolBalanceUSD += holdings[holding].poolBalanceUSD;
         }
       }
 
-      // calculating YFI staked on gov and veCRV locked finally using link:https://hackmd.io/@dudesahn/BkxKfTzqw#Totals-reasoning-above-in-%E2%80%9CCalculating-Totals-Avoiding-Double-Counting%E2%80%9D
+      // calculating YFI staked on gov and veCRV locked finally using link:services/tvl/readme.md
       if (holdings[holding]) {
         if (holdings[holding].name === 'staked YFI') {
           stakedYFI +=
