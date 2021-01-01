@@ -85,11 +85,11 @@ const getEarnHoldings = async (earn) => {
 
 const getHoldings = async vault => {
   const strategyAddress = await getVaultsStrategy(vault);
-  const strategyContract = new web3.eth.Contract(
+  const strategyContract = await new web3.eth.Contract(
     strategyMinABI,
     strategyAddress,
   );
-  const vaultContract = new web3.eth.Contract(
+  const vaultContract = await new web3.eth.Contract(
     vault.vaultContractABI,
     vault.vaultContractAddress,
   );
