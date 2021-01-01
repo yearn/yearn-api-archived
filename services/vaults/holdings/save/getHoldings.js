@@ -93,9 +93,13 @@ const getHoldings = async vault => {
     vault.vaultContractABI,
     vault.vaultContractAddress,
   );
+/*   console.log('vaultABI:', vault.vaultContractABI); */
+  console.log('vaultContractAddress:', vault.vaultContractAddress);
+/*   console.log('vaultContract:', vaultContract); */
   const vaultHoldings =
     (await vaultContract.methods.balance().call()) /
     Math.pow(10, vault.decimals);
+    console.log('vaultHoldings', vaultHoldings);
   const strategyHoldings =
     (await strategyContract.methods.balanceOf().call()) /
     Math.pow(
