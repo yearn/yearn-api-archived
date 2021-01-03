@@ -1,4 +1,5 @@
 service: yearn
+frameworkVersion: '2'
 
 plugins:
   - serverless-dynamodb-local
@@ -9,9 +10,7 @@ plugins:
   - serverless-deployment-bucket
 
 custom:
-  defaultStage: dev
-  currentStage: ${opt:stage, self:custom.defaultStage}
-  customDomain: ${file(./config/serverless/domain.js):${self:custom.currentStage}}
+  customDomain: ${file(config/serverless/domain.js):${self:provider.stage, 'dev'}}
   serverless-offline:
     useChildProcesses: true
   basePath: ''
@@ -34,6 +33,15 @@ custom:
           description: Loanscan endpoints (not for general consumption)
         - name: Yearn
           description: Yearn organization endpoints
+
+  # stage-specific configuration
+  dev:
+    schedule:
+      enabled: false
+  prod:
+    schedule:
+      enabled: true
+
   dynamodb:
     stages:
       - local
@@ -43,20 +51,37 @@ custom:
       migrate: true
 
 resources:
-  - ${file(./sls-resources/resource.${opt:stage, self:provider.stage}.yml), ''}
+  - ${file(resources/resource.${opt:stage, self:provider.stage}.yml), ''}
+  - ${file(resources/api-gateway-errors.yml)}
 
 provider:
   name: aws
   runtime: nodejs12.x
-  profile: ${file(./awsProfile.yml):aws_profile}
+  region: us-east-1
+  profile: ${file(awsProfile.yml):aws_profile}
+  stage: ${opt:stage, 'dev'}
+
   deploymentBucket:
-    name: ${self:custom.currentStage}-deployment-yearn.finance
+    name: ${self:provider.stage, 'dev'}-deployment-yearn.finance
     serverSideEncryption: AES256
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
+        - dynamodb:BatchWriteItem
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
+
 functions:
   # /vaults
   vaults:
     handler: services/vaults/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -72,15 +97,38 @@ functions:
             tags:
               - Vaults
             description: Vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0). Includes controller/strategy info. Updates once an hour.
-          queryParams:
-            - name: 'apy'
-              description: 'Include vault APY'
-              type: 'boolean'
-              required: false
+            queryParams:
+              - name: 'apy'
+                description: 'Include vault APY'
+                type: 'boolean'
+                required: false
+
+  vaults-all:
+    handler: services/vaults/all/handler.handler
+    timeout: 30
+    events:
+      - http:
+          path: /vaults/all
+          method: get
+          cors: true
+          documentation:
+            summary: Gets all vaults (all versions) from the vault registry
+            tags:
+              - Vaults
+            description: >
+              V1 vaults are pulled from the vault registry (https://etherscan.io/address/0x3ee41c098f9666ed2ea246f4d2558010e59d63a0).
+              V2 vaults are pulled from thegraph (https://api.thegraph.com/subgraphs/name/salazarguille/yearn-vaults-v2-subgraph-rinkeby).
+
+  vaults-all-job:
+    handler: services/vaults/all/job.handler
+    events:
+      - http:
+          path: /vaults/all/job
+          method: get
+          cors: true
 
   vaults-snapshots:
     handler: services/vaults/snapshots/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -96,7 +144,6 @@ functions:
 
   vaults-v2:
     handler: services/vaults/v2/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -110,7 +157,6 @@ functions:
 
   vaults-addresses:
     handler: services/vaults/addresses/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -126,8 +172,10 @@ functions:
 
   vaults-save:
     handler: services/vaults/save/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
+      - schedule:
+        rate: rate(1 hour)
+        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
       - http:
           path: /vaults/save
           method: get
@@ -135,7 +183,6 @@ functions:
 
   vaults-apy:
     handler: services/vaults/apy/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -151,15 +198,17 @@ functions:
 
   vaults-apy-save:
     handler: services/vaults/apy/save/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
+      - schedule:
+        rate: rate(10 minute)
+        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
       - http:
           path: /vaults/apy/save
           method: get
+          cors: true
 
   vaults-holdings:
     handler: services/vaults/holdings/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -175,15 +224,17 @@ functions:
 
   vaults-holdings-save:
     handler: services/vaults/holdings/save/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     events:
+      - schedule:
+        rate: rate(1 hour)
+        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
       - http:
           path: /vaults/holdings/save
           method: get
-  
+          cors: true
+
   tvl:
     handler: services/tvl/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -191,7 +242,24 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: Calculates YEARN TVL as defined here https://hackmd.io/@dudesahn/BkxKfTzqw#Totals-reasoning-above-in-%E2%80%9CCalculating-Totals-Avoiding-Double-Counting%E2%80%9D
+            summary: fetches from DB the TVL. 
+            tags:
+              - TVL
+            description: >
+              If param ?historic=true is passed, then all TVLs are delivered, if not, then only last TVL is delivered.
+            queryParams:
+              - name: 'historic'
+                description: 'if true, then the full historic TVL values from DB are delivered'
+                type: 'boolean'
+                required: false
+  tvl-save:
+    handler: services/tvl/save/handler.handler
+    events:
+      - http:
+          path: /tvl/save
+          method: get
+          documentation:
+            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md 
             tags:
               - TVL
             description: >
@@ -199,7 +267,6 @@ functions:
   # /user
   user-vaults:
     handler: services/user/vaults/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -221,30 +288,29 @@ functions:
               - User
             description: >
               Optionally include vault statistics and transactions per user. Valid query param values are "true" and "false"
-          pathParams:
-            - name: 'userAddress'
-              description: 'User account address. Format: 0x{...}'
-          queryParams:
-            - name: 'apy'
-              description: 'Include vault APY'
-              type: 'boolean'
-              required: false
-            - name: 'transactions'
-              description: 'Include user vault transactions'
-              type: 'boolean'
-              required: false
-            - name: 'showall'
-              description: 'Inclue all vaults (including vaults the user has not interacted with)'
-              type: 'boolean'
-              required: false
-            - name: 'statistics'
-              description: 'Include user vault statistics (deposits, withdraws, transfers)'
-              type: 'boolean'
-              required: false
+            pathParams:
+              - name: 'userAddress'
+                description: 'User account address. Format: 0x{...}'
+            queryParams:
+              - name: 'apy'
+                description: 'Include vault APY'
+                type: 'boolean'
+                required: false
+              - name: 'transactions'
+                description: 'Include user vault transactions'
+                type: 'boolean'
+                required: false
+              - name: 'showall'
+                description: 'Inclue all vaults (including vaults the user has not interacted with)'
+                type: 'boolean'
+                required: false
+              - name: 'statistics'
+                description: 'Include user vault statistics (deposits, withdraws, transfers)'
+                type: 'boolean'
+                required: false
 
   user-vaults-transactions:
     handler: services/user/vaults/transactions/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -261,13 +327,12 @@ functions:
               - User
             description: >
               Includes amount/shares, calculated by tracing the Yearn vault contract methods. Transactions come from the Yearn subgraph.
-          pathParams:
-            - name: 'userAddress'
-              description: 'User account address. Format: 0x{...}'
+            pathParams:
+              - name: 'userAddress'
+                description: 'User account address. Format: 0x{...}'
 
   user-vaults-statistics:
     handler: services/user/vaults/statistics/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -284,13 +349,12 @@ functions:
               - User
             description: >
               Currently earnings include token transfer events (such as zaps). This should be configurable in the future. Statistics come from the Yearn subgraph.
-          pathParams:
-            - name: 'userAddress'
-              description: 'User account address. Format: 0x{...}'
+            pathParams:
+              - name: 'userAddress'
+                description: 'User account address. Format: 0x{...}'
 
   user-vaults-earnings:
     handler: services/user/vault/earnings/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -301,14 +365,14 @@ functions:
             parameters:
               paths:
                 userAddress: true
-          pathParams:
-            - name: 'userAddress'
-              description: 'User account address. Format: 0x{...}'
+            documentation:
+              pathParams:
+                - name: 'userAddress'
+                  description: 'User account address. Format: 0x{...}'
 
   # /loanscan
   loanscan-link:
     handler: services/loanscan/link/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -324,7 +388,6 @@ functions:
 
   loanscan-eth-stable:
     handler: services/loanscan/eth-stable/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -340,7 +403,6 @@ functions:
 
   loanscan-ycrv:
     handler: services/loanscan/ycrv/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -356,7 +418,6 @@ functions:
 
   loanscan-crvbtc:
     handler: services/loanscan/crvbtc/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -372,7 +433,6 @@ functions:
 
   loanscan-crvbusd:
     handler: services/loanscan/crvbusd/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -389,12 +449,10 @@ functions:
   # /yearn
   yearn-repos-save:
     handler: services/yearn/repos/save/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
 
   yearn-repos:
     handler: services/yearn/repos/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -408,7 +466,6 @@ functions:
 
   yearn-repos-statistics:
     handler: services/yearn/repos/statistics/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:
@@ -422,7 +479,6 @@ functions:
 
   yearn-repos-contributors:
     handler: services/yearn/repos/contributors/handler.handler
-    role: arn:aws:iam::698083237070:role/service-role/fetchTokenIds-role-o9i24lq2
     timeout: 30
     events:
       - http:

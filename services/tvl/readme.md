@@ -71,7 +71,7 @@ mUSD Pool
 
 GUSD Pool
 
-- Contract `0x4f062658EaAF2C1ccf8C8e36D6824CDf41167956`
+- Contract `0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6`
 
 ### Non-Stablecoin yVault Contracts
 
@@ -168,7 +168,7 @@ ySUSD v2
 0x73a052500105205d34daf004eab301916da8190f
 0xF61718057901F84C4eEC4339EF8f0D86D2B45600
 
-Read `totalSupply` and multiply that by `getPricePerFullShare`. Note that USDT and USDC have 6 decimals for `totalSupply`.
+Read `calcPoolValueInToken`. Note that USDT and USDC have 6 decimals.
 
 **v3 Stablecoins**
 yDAI v3
@@ -181,13 +181,13 @@ yBUSD v3
 0xE6354ed5bC4b393a5Aad09f21c46E101e692d447
 0x04bC0Ab673d88aE9dbC9DA2380cB6B79C4BCa9aE
 
-Read `totalSupply` and multiply that by `getPricePerFullShare`. Note that USDT and USDC have 6 decimals for `totalSupply`.
+Read `calcPoolValueInToken`. Note that USDT and USDC have 6 decimals.
 
 **yWBTC**
 
 0x04Aa51bbcB46541455cCF1B8bef2ebc5d3787EC9
 
-Read `totalSupply`(for yWBTC this has 8 decimals), multiply by the WBTC price from Uniquote, and multiply that by `getPricePerFullShare`.
+Read `calcPoolValueInToken`, (for yWBTC this has 8 decimals), and multiply by the WBTC price from Uniquote.
 
 ### Yearn veCRV
 

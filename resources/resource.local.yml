@@ -47,3 +47,19 @@ Resources:
       AttributeDefinitions:
         - AttributeName: address
           AttributeType: S
+  DynamoDBTable5:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: historicTvl
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: TvlUSD
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: TvlUSD
+          AttributeType: N
+        - AttributeName: timestamp
+          AttributeType: N

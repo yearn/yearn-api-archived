@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../lib/handler');
 const _ = require('lodash');
 const { injectDataIntoVaultAtKey } = require('../../../utils/vaults');
 
@@ -11,7 +12,7 @@ const { getVaultsStatistics } = require('./statistics/handler');
 const { getVaultsApy } = require('../../vaults/apy/handler');
 const { getVaults } = require('../../vaults/handler');
 
-module.exports.handler = async (event) => {
+module.exports.handler = handler(async (event) => {
   const userAddress = event.pathParameters.userAddress;
   const queryParams = event.queryStringParameters;
   const showTransactions = _.get(queryParams, 'transactions') === 'true';
@@ -67,13 +68,6 @@ module.exports.handler = async (event) => {
   } else {
     vaultsWithData = [];
   }
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(vaultsWithData),
-  };
-  return response;
-};
+
+  return vaultsWithData;
+});

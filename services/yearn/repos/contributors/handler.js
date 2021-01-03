@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 const dynamodb = require('../../../../utils/dynamoDb');
 const _ = require('lodash');
 
@@ -14,7 +15,7 @@ const getRepos = async () => {
   return repos;
 };
 
-exports.handler = async () => {
+module.exports.handler = handler(async () => {
   const repos = await getRepos();
   const contributorMap = {};
 
@@ -39,14 +40,5 @@ exports.handler = async () => {
   const contributors = _.map(contributorMap);
 
   // const orderedContributions = _.orderBy(contributors, "contributions", "desc");
-
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(contributors),
-  };
-  return response;
-};
+  return contributors;
+});

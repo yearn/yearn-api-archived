@@ -1,5 +1,6 @@
 'use strict';
 
+const handler = require('../../../../lib/handler');
 require('dotenv').config();
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
@@ -99,19 +100,6 @@ const getVaultsStatistics = async (userAddress) => {
   return vaultsStatistics;
 };
 
-module.exports.handler = async (event) => {
-  const userAddress = event.pathParameters.userAddress;
-  const vaultsStatistics = await getVaultsStatistics(userAddress);
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify(vaultsStatistics),
-  };
-};
-
 function getMinimalVaultABI() {
   return [
     {
@@ -134,3 +122,9 @@ function getMinimalVaultABI() {
 }
 
 module.exports.getVaultsStatistics = getVaultsStatistics;
+
+module.exports.handler = handler(async (event) => {
+  const userAddress = event.pathParameters.userAddress;
+  const vaultsStatistics = await getVaultsStatistics(userAddress);
+  return vaultsStatistics;
+});
