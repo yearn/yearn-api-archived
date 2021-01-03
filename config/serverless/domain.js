@@ -5,7 +5,7 @@ const _ = require('lodash');
 const DEFAULT = {
   domainName: 'api.yearn.tools',
   certificateName: 'yearn.tools',
-  stage: '${self:custom.currentStage}',
+  stage: '${self:provider.stage}',
   createRoute53Record: true,
   basePath: '${self:custom.basePath}',
   endpointType: 'regional',
