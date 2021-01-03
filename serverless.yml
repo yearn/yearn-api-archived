@@ -51,7 +51,7 @@ custom:
       migrate: true
 
 resources:
-  - ${file(sls-resources/resource.${opt:stage, self:provider.stage}.yml), ''}
+  - ${file(resources/resource.${opt:stage, self:provider.stage}.yml), ''}
   - ${file(resources/api-gateway-errors.yml)}
 
 provider:
@@ -241,6 +241,23 @@ functions:
           path: /tvl
           method: get
           cors: true
+          documentation:
+            summary: fetches from DB the TVL. 
+            tags:
+              - TVL
+            description: >
+              If param ?historic=true is passed, then all TVLs are delivered, if not, then only last TVL is delivered.
+            queryParams:
+              - name: 'historic'
+                description: 'if true, then the full historic TVL values from DB are delivered'
+                type: 'boolean'
+                required: false
+  tvl-save:
+    handler: services/tvl/save/handler.handler
+    events:
+      - http:
+          path: /tvl/save
+          method: get
           documentation:
             summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md 
             tags:
