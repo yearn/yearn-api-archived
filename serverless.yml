@@ -242,7 +242,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: fetches from DB the TVL. 
+            summary: fetches from DB the TVL.
             tags:
               - TVL
             description: >
@@ -259,7 +259,7 @@ functions:
           path: /tvl/save
           method: get
           documentation:
-            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md 
+            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md
             tags:
               - TVL
             description: >

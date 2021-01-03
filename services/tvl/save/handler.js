@@ -27,7 +27,7 @@ const getHoldings = async () => {
   return holdings;
 };
 
-const calcTvl = async () =>{
+const calcTvl = async () => {
   let tvl = 0;
   const holdings = await getHoldings();
   let totalVaultHoldings = 0;
@@ -37,7 +37,7 @@ const calcTvl = async () =>{
   let veCRV = 0;
   let doubleCountedVaults = 0;
   let holding;
-  
+
   // eslint-disable-next-line no-restricted-syntax
   for (holding in holdings) {
     if (holding) {
@@ -47,8 +47,8 @@ const calcTvl = async () =>{
           holdings[holding].holdings.vaultHoldings *
           holdings[holding].price_usd;
         totalStrategyHoldings +=
-        holdings[holding].holdings.strategyHoldings *
-        holdings[holding].price_usd;
+          holdings[holding].holdings.strategyHoldings *
+          holdings[holding].price_usd;
         // removing strategy double counting.
         if (
           holdings[holding].name === 'DAI' ||
@@ -60,7 +60,7 @@ const calcTvl = async () =>{
           totalVaultHoldings -=
             holdings[holding].holdings.strategyHoldings *
             holdings[holding].price_usd;
-            totalStrategyHoldings -=
+          totalStrategyHoldings -=
             holdings[holding].holdings.strategyHoldings *
             holdings[holding].price_usd;
         }
@@ -114,12 +114,12 @@ const calcTvl = async () =>{
     stakedYFI +
     veCRV -
     doubleCountedVaults;
-    console.log('totalVaultHoldings:',totalVaultHoldings);
-    console.log('totalPoolBalanceUSD:', totalPoolBalanceUSD);
-    console.log('totalStrategyHoldings:', totalStrategyHoldings);
-    console.log('stakedYFI:', stakedYFI );
-    console.log('veCRV:', veCRV);
-    console.log('doubleCountedVaults:', doubleCountedVaults);
+  console.log('totalVaultHoldings:', totalVaultHoldings);
+  console.log('totalPoolBalanceUSD:', totalPoolBalanceUSD);
+  console.log('totalStrategyHoldings:', totalStrategyHoldings);
+  console.log('stakedYFI:', stakedYFI);
+  console.log('veCRV:', veCRV);
+  console.log('doubleCountedVaults:', doubleCountedVaults);
 
   const calculations = {
     totalVaultHoldings:
@@ -136,13 +136,10 @@ const calcTvl = async () =>{
   };
 
   return output;
-
-}
+};
 
 module.exports.handler = handler(async () => {
-
   const tvl = await calcTvl();
   await saveTvl(tvl);
   return tvl;
-
 });

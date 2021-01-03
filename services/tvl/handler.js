@@ -8,7 +8,7 @@ const db = dynamodb.doc;
 
 const getHoldings = async () => {
   const params = {
-    TableName: 'historicTvl'
+    TableName: 'historicTvl',
   };
   const entries = await db.scan(params).promise();
   const holdings = entries.Items;
@@ -20,10 +20,8 @@ module.exports.handler = handler(async (event) => {
   const queryParams = event.queryStringParameters;
   const showApy = _.get(queryParams, 'historic') === 'true';
   const holdings = await getHoldings();
-  if (showApy){
+  if (showApy) {
     return holdings;
   }
-    return holdings[holdings.length-1];
-
-
+  return holdings[holdings.length - 1];
 });
