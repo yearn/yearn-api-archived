@@ -7,7 +7,6 @@ This is part of the TVL calculation defined here: https://hackmd.io/@dudesahn/Bk
 
 'use strict';
 
-
 const handler = require('../../../../lib/handler');
 require('dotenv').config();
 
@@ -219,6 +218,5 @@ module.exports.handler = handler(async () => {
   const veCRVLocked = await readveCRV();
   vaultsWithHoldings.push(staked);
   vaultsWithHoldings.push(veCRVLocked);
-
   return vaultsWithHoldings;
 });
