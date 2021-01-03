@@ -103,6 +103,7 @@ module.exports.handler = handler(async () => {
     veCRV -
     doubleCountedVaults;
     console.log('totalVaultHoldings:',totalVaultHoldings);
+    console.log('totalStrategyHoldings:', totalStrategyHoldings);
     console.log('totalPoolBalanceUSD:', totalPoolBalanceUSD);
     console.log('stakedYFI:', stakedYFI );
     console.log('veCRV:', veCRV);

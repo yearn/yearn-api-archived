@@ -51,7 +51,7 @@ custom:
       migrate: true
 
 resources:
-  - ${file(sls-resources/resource.${opt:stage, self:provider.stage}.yml), ''}
+  - ${file(resources/resource.${opt:stage, self:provider.stage}.yml), ''}
   - ${file(resources/api-gateway-errors.yml)}
 
 provider:

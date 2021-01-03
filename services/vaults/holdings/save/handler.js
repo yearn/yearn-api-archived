@@ -64,7 +64,6 @@ const readVault = async (vault) => {
         vault.symbol === 'crvBTC' ||
         vault.symbol === '3Crv'
     ){
-      const symbol = vault.symbol;
       const pool = _.find(pools, { symbol });
       const currentBlockNbr = await web3.eth.getBlockNumber();
       const virtualPriceCurrent = await getVirtualPrice.getVirtualPrice(
