@@ -71,7 +71,7 @@ mUSD Pool
 
 GUSD Pool
 
-- Contract `0x4f062658EaAF2C1ccf8C8e36D6824CDf41167956`
+- Contract `0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6`
 
 ### Non-Stablecoin yVault Contracts
 
