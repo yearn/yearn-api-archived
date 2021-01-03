@@ -174,8 +174,8 @@ functions:
     handler: services/vaults/save/handler.handler
     events:
       - schedule:
-        rate: rate(1 hour)
-        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
+          rate: rate(1 hour)
+          enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
       - http:
           path: /vaults/save
           method: get
@@ -200,8 +200,8 @@ functions:
     handler: services/vaults/apy/save/handler.handler
     events:
       - schedule:
-        rate: rate(10 minute)
-        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
+          rate: rate(10 minutes)
+          enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
       - http:
           path: /vaults/apy/save
           method: get
@@ -226,8 +226,8 @@ functions:
     handler: services/vaults/holdings/save/handler.handler
     events:
       - schedule:
-        rate: rate(1 hour)
-        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
+          rate: rate(1 hour)
+          enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
       - http:
           path: /vaults/holdings/save
           method: get
