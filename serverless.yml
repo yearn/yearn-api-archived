@@ -36,10 +36,10 @@ custom:
 
   # stage-specific configuration
   dev:
-    schedule:
+    jobs-schedule:
       enabled: false
   prod:
-    schedule:
+    jobs-schedule:
       enabled: true
 
   dynamodb:
@@ -122,10 +122,9 @@ functions:
   vaults-all-job:
     handler: services/vaults/all/job.handler
     events:
-      - http:
-          path: /vaults/all/job
-          method: get
-          cors: true
+      - schedule:
+          rate: rate(10 minutes)
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-snapshots:
     handler: services/vaults/snapshots/handler.handler
@@ -175,11 +174,7 @@ functions:
     events:
       - schedule:
           rate: rate(1 hour)
-          enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
-      - http:
-          path: /vaults/save
-          method: get
-          cors: true
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-apy:
     handler: services/vaults/apy/handler.handler
@@ -201,11 +196,7 @@ functions:
     events:
       - schedule:
           rate: rate(10 minutes)
-          enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
-      - http:
-          path: /vaults/apy/save
-          method: get
-          cors: true
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-holdings:
     handler: services/vaults/holdings/handler.handler
@@ -227,11 +218,7 @@ functions:
     events:
       - schedule:
           rate: rate(1 hour)
-          enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
-      - http:
-          path: /vaults/holdings/save
-          method: get
-          cors: true
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   tvl:
     handler: services/tvl/handler.handler
@@ -252,6 +239,7 @@ functions:
                 description: 'if true, then the full historic TVL values from DB are delivered'
                 type: 'boolean'
                 required: false
+
   tvl-save:
     handler: services/tvl/save/handler.handler
     events:
@@ -264,6 +252,7 @@ functions:
               - TVL
             description: >
               Uses the Holdings table as input to calculate the TVL avoiding double counting.
+
   # /user
   user-vaults:
     handler: services/user/vaults/handler.handler
