@@ -10,6 +10,8 @@ const erc20Abi = require('../../../abi/erc20.json');
 
 const vaultInterface = require('../lib/vaults');
 
+const etherscanDelay = 500;
+
 // FetchTokenDetails with a batch call to the ERC20 token addresses inside
 // each vault. Extracting name, symbol and decimals.
 const fetchTokenDetails = async (client, vaults) => {
@@ -47,6 +49,10 @@ const fetchAllVaults = async (client) => {
   let v1Addresses = await vaultInterface.v1.fetchAddresses();
   let v2Addresses = await vaultInterface.v2.fetchAddresses();
 
+  console.log(
+    `Fetching ${v1Addresses.length} v1 vaults, ${v2Addresses.length} v2 vaults`,
+  );
+
   const all = [...v1Addresses, ...v2Addresses];
   const cachedVaultsMap = await vaultInterface.cache.fetchCachedVaults(all);
 
@@ -55,7 +61,10 @@ const fetchAllVaults = async (client) => {
 
   const cachedVaults = Object.values(cachedVaultsMap);
 
+  console.log(`Cached vaults are ${cachedVaults.length}`);
+
   if ([...v1Addresses, ...v2Addresses].length === 0) {
+    console.log('Skipping vault fetching since all vaults are cached');
     return cachedVaults;
   }
 
@@ -80,6 +89,8 @@ const fetchAllVaults = async (client) => {
     },
   ];
 
+  console.log('Fetching new vaults...');
+
   // Fetch new vaults data
   const res = await client.execute(contracts);
   const newVaults = res.map(
@@ -95,13 +106,18 @@ const fetchAllVaults = async (client) => {
     }),
   );
 
+  console.log('Injecting `inceptionBlock` into new vaults...');
+
   // Inject inception block from etherscan
   for (const vault of newVaults) {
     const { address } = vault;
     const inceptionBlock = await vaultInterface.getInceptionBlock(address);
-    await delay(300);
+    console.log(`\t-${vault.name}`);
+    await delay(etherscanDelay);
     vault.inceptionBlock = inceptionBlock;
   }
+
+  console.log('Injecting `token` into new vaults...');
 
   // Inject token details
   const tokenDetails = await fetchTokenDetails(client, newVaults);
@@ -110,12 +126,16 @@ const fetchAllVaults = async (client) => {
     vault.token = tokenDetails[vault.token.address];
   }
 
+  console.log('Timestamping new vaults...');
+
   const timestamp = unix();
 
   // Add timestamps
   for (const vault of newVaults) {
     vault.created = timestamp;
   }
+
+  console.log('Fetched all new vaults!');
 
   return [...newVaults, ...cachedVaults];
 };
@@ -129,7 +149,7 @@ module.exports.handler = handler(async () => {
     simplifyResponse: true,
     etherscan: {
       apiKey: etherscanApiKey,
-      delay: 300,
+      delay: etherscanDelay,
     },
   });
 
@@ -143,11 +163,14 @@ module.exports.handler = handler(async () => {
     vaults.map(async (vault) => {
       try {
         vault.apy = await vaultInterface.roi.getVaultApy(vault, blockStats);
-      } catch {
+      } catch (err) {
+        console.error(vault, err);
         vault.apy = {};
       }
     }),
   );
+
+  console.log('Injecting assets in all vaults');
 
   // Assets
   const assets = await vaultInterface.assets.fetchAssets();
@@ -162,12 +185,16 @@ module.exports.handler = handler(async () => {
     vault.icon = assets[vault.address] || null;
   }
 
+  console.log('Injecting timestamp in all vaults');
+
   const timestamp = unix();
 
   // Add timestamps
   for (const vault of vaults) {
     vault.updated = timestamp;
   }
+
+  console.log('Updating all vaults...');
 
   // Cache updated & new vaults
   await vaultInterface.cache.cacheVaults(vaults);

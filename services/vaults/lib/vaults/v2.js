@@ -2,7 +2,7 @@
 
 // const _ = require('lodash');
 // const fetch = require('node-fetch');
-const vaultAbi = require('../../../../abi/vaults/yvault_v1.json');
+const vaultAbi = require('../../../../abi/vaults/yvault_v2.json');
 
 // const SUBGRAPH_URL =
 // 'https://api.thegraph.com/subgraphs/name/salazarguille/yearn-vaults-v2-subgraph-rinkeby';
