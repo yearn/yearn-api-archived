@@ -14,7 +14,6 @@ const saveTvl = async (data) => {
     .put(params)
     .promise()
     .catch((err) => console.log('err', err));
-  console.log(`Saved ${data.name}`);
 };
 
 const getHoldings = async () => {

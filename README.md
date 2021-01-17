@@ -60,9 +60,8 @@ docker-compose up
   - If you want to change the local port, change the "ports" entry under "serverless" in the docker-compose.yml
 - The dirs config, services and utils are mounted into the running container, so you code changes will become available instantly on the running instance
   - If you want to change that, remove the "volumes" entries under "serverless" in the docker-compose.yml
-  - Once API is running, you need to populate the DBs with data. For example, run the following command inside the container: `sls invoke local --fuction vaults-apy-save` which will store APY values for all vaults into DB. Afterwards, you can read the values by calling http://0.0.0.0:3000/local/vaults/apy. 
+  - Once API is running, you need to populate the DBs with data. For example, run the following command inside the container: `sls invoke local --fuction vaults-apy-save` which will store APY values for all vaults into DB. Afterwards, you can read the values by calling http://0.0.0.0:3000/local/vaults/apy.
   - You can find all the function names which can be called in the serverless.yml file.
-
 
 ## Stages
 
