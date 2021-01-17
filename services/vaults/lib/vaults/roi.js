@@ -4,9 +4,12 @@ const Web3 = require('web3');
 
 const web3 = new Web3(process.env.ARCHIVENODE_ENDPOINT);
 
+const v1 = require('./v1');
+const v2 = require('./v2');
+
 const ABI_MAP = {
-  v1: require('../../../../abi/vaultV1.json'),
-  v2: require('../../../../abi/vaultV2.json'),
+  v1: v1.abi(),
+  v2: v2.abi(),
 };
 
 const PPFS_MAP = {
@@ -67,6 +70,8 @@ module.exports.getVaultApy = async (vault, blockStats) => {
     },
   ];
 
+  console.log(vault.type);
+
   const getPrice = async (block, fallback) => {
     if (block) {
       return block > inceptionBlock
@@ -102,14 +107,16 @@ module.exports.getVaultApy = async (vault, blockStats) => {
               decimals,
             );
             entries.push([current.name, roi]);
-          } catch {
+          } catch (err) {
+            console.log(vault, err);
             entries.push([current.name, null]);
           }
           return entries;
         })
         .reduce((p, fn) => p.then(fn), Promise.resolve([])),
     );
-  } catch (e) {
+  } catch (err) {
+    console.log(vault, err);
     return Object.fromEntries(timeframes.map(({ name }) => [name, null]));
   }
 };

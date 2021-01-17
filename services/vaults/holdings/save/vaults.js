@@ -21,7 +21,7 @@ module.exports = [
     withdrawAll: true,
     lastMeasurement: 10774489,
     measurement: 1e18,
-    depositDisabled: true
+    depositDisabled: true,
   },
   {
     id: 'YFI',
@@ -40,7 +40,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10695309,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'CRV',
@@ -59,7 +59,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'yvmusd3CRV',
@@ -78,8 +78,8 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18
-  },  
+    measurement: 1e18,
+  },
   {
     id: 'yvgusd3CRV',
     name: 'curve.fi GUSD/3Crv LP',
@@ -97,8 +97,8 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18
-  },  
+    measurement: 1e18,
+  },
   {
     id: 'vcDAI+cUSDC',
     name: 'yearn Curve.fi cDAI/cUSDC',
@@ -116,7 +116,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10559448,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'crvBUSD',
@@ -136,7 +136,7 @@ module.exports = [
     withdrawAll: true,
     depositDisabled: false,
     lastMeasurement: 10709740,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'crvBTC',
@@ -155,7 +155,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10734341,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: '3Crv',
@@ -175,8 +175,8 @@ module.exports = [
     withdrawAll: true,
     lastMeasurement: 11039340,
     measurement: 1e18,
-    depositDisabled: false
-  },  
+    depositDisabled: false,
+  },
   {
     id: 'GUSD',
     name: 'GUSD',
@@ -195,7 +195,7 @@ module.exports = [
     withdrawAll: true,
     lastMeasurement: 11039340,
     measurement: 1e18,
-    depositDisabled: false 
+    depositDisabled: false,
   },
   {
     id: 'DAI',
@@ -214,7 +214,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10650116,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'TUSD',
@@ -233,7 +233,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10603368,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'USDC',
@@ -252,7 +252,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: false,
     lastMeasurement: 10532708,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'USDT',
@@ -271,7 +271,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10651402,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'aLINK',
@@ -291,7 +291,7 @@ module.exports = [
     withdraw: true,
     withdrawAll: true,
     lastMeasurement: 10599617,
-    measurement: 1e18
+    measurement: 1e18,
   },
   {
     id: 'LINK',
@@ -312,6 +312,6 @@ module.exports = [
     withdrawAll: true,
     depositDisabled: true,
     lastMeasurement: 10604016,
-    measurement: 1e18
+    measurement: 1e18,
   },
 ];

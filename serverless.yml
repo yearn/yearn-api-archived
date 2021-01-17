@@ -36,10 +36,10 @@ custom:
 
   # stage-specific configuration
   dev:
-    schedule:
+    jobs-schedule:
       enabled: false
   prod:
-    schedule:
+    jobs-schedule:
       enabled: true
 
   dynamodb:
@@ -122,10 +122,9 @@ functions:
   vaults-all-job:
     handler: services/vaults/all/job.handler
     events:
-      - http:
-          path: /vaults/all/job
-          method: get
-          cors: true
+      - schedule:
+          rate: rate(10 minutes)
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-snapshots:
     handler: services/vaults/snapshots/handler.handler
@@ -174,12 +173,8 @@ functions:
     handler: services/vaults/save/handler.handler
     events:
       - schedule:
-        rate: rate(1 hour)
-        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
-      - http:
-          path: /vaults/save
-          method: get
-          cors: true
+          rate: rate(1 hour)
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-apy:
     handler: services/vaults/apy/handler.handler
@@ -200,12 +195,8 @@ functions:
     handler: services/vaults/apy/save/handler.handler
     events:
       - schedule:
-        rate: rate(10 minute)
-        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
-      - http:
-          path: /vaults/apy/save
-          method: get
-          cors: true
+          rate: rate(10 minutes)
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-holdings:
     handler: services/vaults/holdings/handler.handler
@@ -226,12 +217,8 @@ functions:
     handler: services/vaults/holdings/save/handler.handler
     events:
       - schedule:
-        rate: rate(1 hour)
-        enabled: ${self:custom.${self:provider.stage}.schedule.enabled}
-      - http:
-          path: /vaults/holdings/save
-          method: get
-          cors: true
+          rate: rate(1 hour)
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   tvl:
     handler: services/tvl/handler.handler
@@ -242,7 +229,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: fetches from DB the TVL. 
+            summary: fetches from DB the TVL.
             tags:
               - TVL
             description: >
@@ -259,11 +246,12 @@ functions:
           path: /tvl/save
           method: get
           documentation:
-            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md 
+            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md
             tags:
               - TVL
             description: >
               Uses the Holdings table as input to calculate the TVL avoiding double counting.
+
   # /user
   user-vaults:
     handler: services/user/vaults/handler.handler
