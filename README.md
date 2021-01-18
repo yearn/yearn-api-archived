@@ -26,7 +26,7 @@ git clone https://github.com/yearn-integrations/yearn-api.git
 
 - Pick an example environment file to use:
 
-  - .sample.loca.env - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
+  - .sample.local.env - uses a local dynamodb instance in the container rather than AWS. Need to call 'save' apis to populate the local tables.
   - .sample.dev.env - uses dynamodb in AWS with credentials (use your own or ask x48 for read-only keys)
 
 - Copy the example .env file
