@@ -18,9 +18,9 @@ const getHoldings = async () => {
 
 module.exports.handler = handler(async (event) => {
   const queryParams = event.queryStringParameters;
-  const showApy = _.get(queryParams, 'historic') === 'true';
+  const showHistoric = _.get(queryParams, 'historic') === 'true';
   const holdings = await getHoldings();
-  if (showApy) {
+  if (showHistoric) {
     return holdings;
   }
   return holdings[holdings.length - 1];

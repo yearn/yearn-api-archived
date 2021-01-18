@@ -40,7 +40,7 @@ const calcTvl = async () => {
   // eslint-disable-next-line no-restricted-syntax
   for (holding in holdings) {
     if (holding) {
-      // calculating totalVaultHoldings as defined in the link: services/tvl/TVL-readme.md
+      // calculating totalVaultHoldings and totalStrategyHoldings as defined in the link: services/tvl/TVL-readme.md
       if (holdings[holding].holdings) {
         totalVaultHoldings +=
           holdings[holding].holdings.vaultHoldings *
@@ -48,13 +48,14 @@ const calcTvl = async () => {
         totalStrategyHoldings +=
           holdings[holding].holdings.strategyHoldings *
           holdings[holding].price_usd;
-        // removing strategy double counting.
+        // removing strategy and vaults double counting.
         if (
           holdings[holding].name === 'DAI' ||
           holdings[holding].name === 'WETH' ||
           holdings[holding].name === 'TUSD' ||
           holdings[holding].name === 'USDT' ||
-          holdings[holding].name === 'USD Coin'
+          holdings[holding].name === 'USD Coin' ||
+          holdings[holding].name === 'yearn mStable USD'
         ) {
           totalVaultHoldings -=
             holdings[holding].holdings.strategyHoldings *
@@ -63,6 +64,7 @@ const calcTvl = async () => {
             holdings[holding].holdings.strategyHoldings *
             holdings[holding].price_usd;
         }
+
         // alink strategyholdings are already in USD, so no need to mnultiply by price_usd
         if (holdings[holding].name === 'aLINK') {
           totalVaultHoldings -= holdings[holding].holdings.strategyHoldings;
@@ -122,7 +124,7 @@ const calcTvl = async () => {
 
   const calculations = {
     totalVaultHoldings:
-      'Sum of vaultHoldings from Holdings endpoint - DAI.strategyHoldings - WETH.strategyHoldings - TUSD.strategyHoldings - aLINK.strategyHoldings - USDT.strategyHoldings - USDC.strategyHoldings - LINK.vaultHoldings',
+      'Sum of vaultHoldings from Holdings endpoint - DAI.strategyHoldings - WETH.strategyHoldings - TUSD.strategyHoldings - aLINK.strategyHoldings - USDT.strategyHoldings - USDC.strategyHoldings - LINK.vaultHoldings - mUSD.strategyHoldings',
     tvl:
       'totalVaultHoldings + yCRV.poolBalanceUSD + crvBUSD.poolBalanceUSD + yWBTC.PoolbalanceUSD + YFI.stakdYFI + veCRV.veVRCLocked - yCRV.vaultHoldings - crvBUSD.vaultHoldings - YFI.vaultHoldings',
   };
