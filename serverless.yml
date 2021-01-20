@@ -122,6 +122,10 @@ functions:
   vaults-all-job:
     handler: services/vaults/all/job.handler
     events:
+      - http:
+          path: /vaults/all/save
+          method: get
+          cors: true
       - schedule:
           rate: rate(10 minutes)
           enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
@@ -172,6 +176,10 @@ functions:
   vaults-save:
     handler: services/vaults/save/handler.handler
     events:
+      - http:
+          path: /vaults/save
+          method: get
+          cors: true
       - schedule:
           rate: rate(1 hour)
           enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
@@ -194,6 +202,10 @@ functions:
   vaults-apy-save:
     handler: services/vaults/apy/save/handler.handler
     events:
+      - http:
+          path: /vaults/apy/save
+          method: get
+          cors: true
       - schedule:
           rate: rate(10 minutes)
           enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}

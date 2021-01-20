@@ -3,6 +3,7 @@
 require('dotenv').config();
 const Web3BatchCall = require('web3-batch-call');
 const delay = require('delay');
+const _ = require('lodash');
 
 const unix = require('../../../lib/timestamp');
 const handler = require('../../../lib/handler');
@@ -48,6 +49,11 @@ const fetchTokenDetails = async (client, vaults) => {
 const fetchAllVaults = async (client) => {
   let v1Addresses = await vaultInterface.v1.fetchAddresses();
   let v2Addresses = await vaultInterface.v2.fetchAddresses();
+
+  // TODO: Refactor
+  v1Addresses = _.filter(v1Addresses, (address) => {
+    return address !== '0xec0d8D3ED5477106c6D4ea27D90a60e594693C90';
+  });
 
   console.log(
     `Fetching ${v1Addresses.length} v1 vaults, ${v2Addresses.length} v2 vaults`,
@@ -163,6 +169,7 @@ module.exports.handler = handler(async () => {
     vaults.map(async (vault) => {
       try {
         vault.apy = await vaultInterface.roi.getVaultApy(vault, blockStats);
+        console.log('apy', vault.address, blockStats, vault.apy);
       } catch (err) {
         console.error(vault, err);
         vault.apy = {};
@@ -177,11 +184,13 @@ module.exports.handler = handler(async () => {
   const symbolAliases = await vaultInterface.assets.fetchSymbolAliases();
 
   for (const vault of vaults) {
+    vault.token = {};
     vault.token.displayName =
-      symbolAliases[vault.token.address] || vault.token.symbol;
-    vault.displayName = vault.token.displayName;
+      symbolAliases[vault.tokenAddress] || vault.token.symbol;
+    // vault.displayName = vault.tokenMetadata.displayName;
 
-    vault.token.icon = assets[vault.token.address] || null;
+    vault.token.icon = assets[vault.tokenAddress] || null;
+    console.log('vvv2', vault);
     vault.icon = assets[vault.address] || null;
   }
 
@@ -197,7 +206,13 @@ module.exports.handler = handler(async () => {
   console.log('Updating all vaults...');
 
   // Cache updated & new vaults
-  await vaultInterface.cache.cacheVaults(vaults);
+  const newVaults = _.map(vaults, (vault) => {
+    vault.tokenMetadata = _.clone(vault.token);
+
+    delete vault.token;
+    return vault;
+  });
+  await vaultInterface.cache.cacheVaults(newVaults);
 
   return {
     message: 'Job executed correctly',

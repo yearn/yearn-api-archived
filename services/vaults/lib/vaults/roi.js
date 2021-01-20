@@ -39,11 +39,21 @@ const calculateYearlyRoi = (
   blocksPerDay,
   decimals,
 ) => {
+  console.log(`previousValue: ${previousValue}`);
+  console.log(`currentValue: ${currentValue}`);
+  console.log(`previousBlock: ${previousBlock}`);
+  console.log(`currentBlock: ${currentBlock}`);
+  console.log(`blocksPerDay: ${blocksPerDay}`);
+  console.log(`decimals: ${decimals}`);
   const pricePerFullShareDelta =
     (currentValue - previousValue) / 10 ** decimals;
+  console.log(`pricePerFullShareDelta: ${pricePerFullShareDelta}`);
   const blockDelta = currentBlock - previousBlock;
+  console.log(`blockDelta: ${blockDelta}`);
   const dailyRoi = (pricePerFullShareDelta / blockDelta) * 100 * blocksPerDay;
+  console.log(`dailyRoi: ${dailyRoi}`);
   const yearlyRoi = dailyRoi * 365;
+  console.log(`yearlyRoi: ${yearlyRoi}`);
   return yearlyRoi;
 };
 
@@ -51,13 +61,20 @@ module.exports.getVaultApy = async (vault, blockStats) => {
   const { currentBlock, oneMonthAgoBlock, blocksPerDay } = blockStats;
   const { inceptionBlock, address } = vault;
 
+  console.log(`address: ${address}`);
+  console.log(`inception block: ${inceptionBlock}`);
+
   const vaultContract = new web3.eth.Contract(ABI_MAP[vault.type], address);
   const pricePerShare = vaultContract.methods[PPFS_MAP[vault.type]];
+
+  console.log(`pricePerShare: ${pricePerShare()}`);
 
   // v2 vaults `pricePerShare` works in relation to the decimals in the vault
   const decimals =
     vault.type === 'v2' ? parseInt(vault.decimals || '18', 10) : 18;
 
+  console.log(`decimals: ${vault.decimals}`);
+  console.log(`inception price: ${10 ** decimals}`);
   const timeframes = [
     {
       name: 'inceptionSample',
@@ -89,6 +106,7 @@ module.exports.getVaultApy = async (vault, blockStats) => {
           try {
             const prev = i > 0 ? timeframes[i - 1] : null;
 
+            console.log(`previous price: ${prev.price}`);
             // get price in timeframe, falling back to prev price if timeframe
             // is greater then the inception of this vault.
             current.price =

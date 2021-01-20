@@ -60,6 +60,9 @@ const saveVault = async (vault) => {
     TableName: 'vaults',
     Item: vault,
   };
+  if (vault.address === '0xec0d8D3ED5477106c6D4ea27D90a60e594693C90') {
+    return;
+  }
   await db
     .put(params)
     .promise()
