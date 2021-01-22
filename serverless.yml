@@ -121,11 +121,8 @@ functions:
 
   vaults-all-job:
     handler: services/vaults/all/job.handler
+    timeout: 30
     events:
-      - http:
-          path: /vaults/all/save
-          method: get
-          cors: true
       - schedule:
           rate: rate(10 minutes)
           enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
@@ -175,11 +172,8 @@ functions:
 
   vaults-save:
     handler: services/vaults/save/handler.handler
+    timeout: 30
     events:
-      - http:
-          path: /vaults/save
-          method: get
-          cors: true
       - schedule:
           rate: rate(1 hour)
           enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
@@ -201,13 +195,10 @@ functions:
 
   vaults-apy-save:
     handler: services/vaults/apy/save/handler.handler
+    timeout: 30
     events:
-      - http:
-          path: /vaults/apy/save
-          method: get
-          cors: true
       - schedule:
-          rate: rate(10 minutes)
+          rate: rate(30 minutes)
           enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   vaults-holdings:
@@ -227,6 +218,7 @@ functions:
 
   vaults-holdings-save:
     handler: services/vaults/holdings/save/handler.handler
+    timeout: 30
     events:
       - schedule:
           rate: rate(1 hour)
@@ -254,16 +246,11 @@ functions:
 
   tvl-save:
     handler: services/tvl/save/handler.handler
+    timeout: 30
     events:
-      - http:
-          path: /tvl/save
-          method: get
-          documentation:
-            summary: Calculates YEARN TVL as defined here https://github.com/iearn-finance/yearn-api/blob/master/services/tvl/readme.md
-            tags:
-              - TVL
-            description: >
-              Uses the Holdings table as input to calculate the TVL avoiding double counting.
+      - schedule:
+          rate: rate(1 hour)
+          enabled: ${self:custom.${self:provider.stage}.jobs-schedule.enabled}
 
   # /user
   user-vaults:
