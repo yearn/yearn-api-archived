@@ -7,6 +7,7 @@ const yearn = require('@yfi/sdk');
 
 const unix = require('../../../lib/timestamp');
 const handler = require('../../../lib/handler');
+const db = require('../../../lib/db');
 
 const plimit = require('p-limit');
 
