@@ -2,9 +2,9 @@
 
 const handler = require('../../../lib/handler');
 
-const vaultInterface = require('../lib/vaults');
+const VAULT_TABLE = 'vaultsNew';
 
 module.exports.handler = handler(async () => {
-  const cached = await vaultInterface.cache.fetchAllCachedVaults();
+  const cached = await db.scan(VAULT_TABLE);
   return cached;
 });

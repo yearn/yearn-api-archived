@@ -8,7 +8,7 @@ const votingEscrowABI = require('../../../../abi/votingEscrow');
 const _ = require('lodash');
 
 const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
-const web3 = new Web3(process.env.WEB3_ENDPOINT);
+const web3 = new Web3(process.env.WEB3_ENDPOINT_HTTPS);
 
 const vaultStrategyMap = {};
 const votingEscrowAddress = '0x5f3b5DfEb7B28CDbD7FAba78963EE202a494e2A2';

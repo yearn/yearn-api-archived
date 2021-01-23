@@ -1,196 +1,102 @@
 'use strict';
 
 require('dotenv').config();
-const Web3BatchCall = require('web3-batch-call');
-const delay = require('delay');
-const _ = require('lodash');
+
+const { WebSocketProvider } = require('@ethersproject/providers');
+const yearn = require('@yfi/sdk');
 
 const unix = require('../../../lib/timestamp');
 const handler = require('../../../lib/handler');
-const erc20Abi = require('../../../abi/erc20.json');
 
-const vaultInterface = require('../lib/vaults');
+const plimit = require('p-limit');
 
-const etherscanDelay = 500;
+const limit = plimit(2);
 
-// FetchTokenDetails with a batch call to the ERC20 token addresses inside
-// each vault. Extracting name, symbol and decimals.
-const fetchTokenDetails = async (client, vaults) => {
-  const readMethods = [
-    { name: 'name' },
-    { name: 'symbol' },
-    { name: 'decimals' },
-  ];
-
-  const contracts = [
-    {
-      addresses: vaults.map(({ token }) => token.address),
-      abi: erc20Abi,
-      readMethods,
-    },
-  ];
-
-  const res = await client.execute(contracts);
-  return Object.fromEntries(
-    res.map(({ address, name, symbol, decimals }) => [
-      address,
-      {
-        address,
-        name,
-        symbol,
-        decimals,
-      },
-    ]),
-  );
-};
+const VAULT_TABLE = 'vaultsNew';
 
 // FetchAllVaults with a batch call to all the available addresses for each
 // version. Extracting name, symbol, decimails and the token address.
-const fetchAllVaults = async (client) => {
-  let v1Addresses = await vaultInterface.v1.fetchAddresses();
-  let v2Addresses = await vaultInterface.v2.fetchAddresses();
+const fetchAllVaults = async (ctx) => {
+  let v1Addresses = await yearn.vault.fetchV1Addresses(ctx);
+  let v2Addresses = await yearn.vault.fetchV2Addresses(ctx);
+  let v2ExperimentalAddresses = await yearn.vault.fetchV2ExperimentalAddresses(
+    ctx,
+  );
 
   // TODO: Refactor
-  v1Addresses = _.filter(v1Addresses, (address) => {
+  v1Addresses = v1Addresses.filter((address) => {
     return address !== '0xec0d8D3ED5477106c6D4ea27D90a60e594693C90';
   });
 
   console.log(
-    `Fetching ${v1Addresses.length} v1 vaults, ${v2Addresses.length} v2 vaults`,
+    'Fetching',
+    v1Addresses.length,
+    'v1 vaults',
+    v2Addresses.length,
+    'v2 vaults',
+    v2ExperimentalAddresses.length,
+    'v2 experimental vaults',
   );
 
-  const all = [...v1Addresses, ...v2Addresses];
-  const cachedVaultsMap = await vaultInterface.cache.fetchCachedVaults(all);
-
-  v1Addresses = v1Addresses.filter((address) => !cachedVaultsMap[address]);
-  v2Addresses = v2Addresses.filter((address) => !cachedVaultsMap[address]);
-
-  const cachedVaults = Object.values(cachedVaultsMap);
-
-  console.log(`Cached vaults are ${cachedVaults.length}`);
-
-  if ([...v1Addresses, ...v2Addresses].length === 0) {
-    console.log('Skipping vault fetching since all vaults are cached');
-    return cachedVaults;
-  }
-
-  const readMethods = [
-    { name: 'name' },
-    { name: 'symbol' },
-    { name: 'decimals' },
-    { name: 'token' },
-  ];
-  const contracts = [
-    {
-      namespace: 'v1',
-      addresses: v1Addresses,
-      abi: vaultInterface.v1.abi(),
-      readMethods,
-    },
-    {
-      namespace: 'v2',
-      addresses: v2Addresses,
-      abi: vaultInterface.v2.abi(),
-      readMethods,
-    },
-  ];
-
-  console.log('Fetching new vaults...');
-
-  // Fetch new vaults data
-  const res = await client.execute(contracts);
-  const newVaults = res.map(
-    ({ address, namespace: type, name, symbol, decimals, token }) => ({
-      address,
-      type,
-      name,
-      symbol,
-      decimals,
-      token: {
-        address: token,
-      },
-    }),
+  const vaults = await Promise.all(
+    v1Addresses
+      .map((address) =>
+        limit(async () => await yearn.vault.resolveV1(address, ctx)),
+      )
+      .concat(
+        v2Addresses.map((address) =>
+          limit(async () => {
+            const vault = await yearn.vault.resolveV2(address, ctx);
+            return { ...vault, endorsed: true };
+          }),
+        ),
+      )
+      .concat(
+        v2ExperimentalAddresses.map((address) =>
+          limit(async () => {
+            const vault = await yearn.vault.resolveV2(address, ctx);
+            return { ...vault, endorsed: false };
+          }),
+        ),
+      ),
   );
 
-  console.log('Injecting `inceptionBlock` into new vaults...');
-
-  // Inject inception block from etherscan
-  for (const vault of newVaults) {
-    const { address } = vault;
-    const inceptionBlock = await vaultInterface.getInceptionBlock(address);
-    console.log(`\t-${vault.name}`);
-    await delay(etherscanDelay);
-    vault.inceptionBlock = inceptionBlock;
-  }
-
-  console.log('Injecting `token` into new vaults...');
-
-  // Inject token details
-  const tokenDetails = await fetchTokenDetails(client, newVaults);
-
-  for (const vault of newVaults) {
-    vault.token = tokenDetails[vault.token.address];
-  }
-
-  console.log('Timestamping new vaults...');
-
-  const timestamp = unix();
-
-  // Add timestamps
-  for (const vault of newVaults) {
-    vault.created = timestamp;
-  }
-
-  console.log('Fetched all new vaults!');
-
-  return [...newVaults, ...cachedVaults];
+  return vaults;
 };
 
 module.exports.handler = handler(async () => {
-  const provider = process.env.WEB3_ENDPOINT;
-  const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
+  const provider = new WebSocketProvider(process.env.WEB3_ENDPOINT_WSS);
+  const etherscan = process.env.ETHERSCAN_API_KEY;
+  const ctx = new yearn.Context({ provider, etherscan });
 
-  const client = new Web3BatchCall({
-    provider,
-    simplifyResponse: true,
-    etherscan: {
-      apiKey: etherscanApiKey,
-      delay: etherscanDelay,
-    },
-  });
-
-  const vaults = await fetchAllVaults(client);
-
-  // Update ROI and Assets
+  const vaults = await fetchAllVaults(ctx);
 
   // ROI
-  const blockStats = await vaultInterface.roi.fetchBlockStats();
   await Promise.all(
-    vaults.map(async (vault) => {
-      try {
-        vault.apy = await vaultInterface.roi.getVaultApy(vault, blockStats);
-        console.log('apy', vault.address, blockStats, vault.apy);
-      } catch (err) {
-        console.error(vault, err);
-        vault.apy = {};
-      }
-    }),
+    vaults.map((vault) =>
+      limit(async () => {
+        try {
+          vault.apy = await yearn.vault.calculateApy(vault, ctx);
+        } catch (err) {
+          console.error(vault, err);
+          vault.apy = {};
+        }
+      }),
+    ),
   );
 
   console.log('Injecting assets in all vaults');
 
   // Assets
-  const assets = await vaultInterface.assets.fetchAssets();
-  const symbolAliases = await vaultInterface.assets.fetchSymbolAliases();
+  const assets = await yearn.data.assets.fetchAssets();
+  const aliases = await yearn.data.assets.fetchAliases();
 
   for (const vault of vaults) {
-    vault.token = {};
-    vault.token.displayName =
-      symbolAliases[vault.tokenAddress] || vault.token.symbol;
-    // vault.displayName = vault.tokenMetadata.displayName;
+    const alias = aliases[vault.tokenAddress];
+    vault.token.displayName = alias ? alias.symbol : vault.token.symbol;
+    vault.displayName = vault.token.displayName;
 
     vault.token.icon = assets[vault.tokenAddress] || null;
-    console.log('vvv2', vault);
     vault.icon = assets[vault.address] || null;
   }
 
@@ -205,14 +111,16 @@ module.exports.handler = handler(async () => {
 
   console.log('Updating all vaults...');
 
-  // Cache updated & new vaults
-  const newVaults = _.map(vaults, (vault) => {
-    vault.tokenMetadata = _.clone(vault.token);
+  // FIXME: remove
+  const newVaults = vaults.map((vault) => {
+    vault.tokenMetadata = Object.assign({}, vault.token);
+    vault.tokenAddress = vault.tokenMetadata.address;
 
     delete vault.token;
     return vault;
   });
-  await vaultInterface.cache.cacheVaults(newVaults);
+
+  await db.batchSet(VAULT_TABLE, newVaults);
 
   return {
     message: 'Job executed correctly',

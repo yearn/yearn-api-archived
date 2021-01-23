@@ -5,7 +5,7 @@ require('dotenv').config();
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 
-const web3 = new Web3(process.env.WEB3_ENDPOINT);
+const web3 = new Web3(process.env.WEB3_ENDPOINT_HTTPS);
 
 const {
   getTransactions,
