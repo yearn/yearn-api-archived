@@ -2,6 +2,8 @@
 
 require('dotenv').config();
 
+const _ = require('lodash');
+
 const { providers } = require('ethers');
 const yearn = require('@yfi/sdk');
 
@@ -28,6 +30,11 @@ const fetchAllVaults = async (ctx) => {
   v1Addresses = v1Addresses.filter((address) => {
     return address !== '0xec0d8D3ED5477106c6D4ea27D90a60e594693C90';
   });
+
+  // remove active from experimental
+  v2ExperimentalAddresses = v2ExperimentalAddresses.filter(
+    (address) => !v2Addresses.includes(address),
+  );
 
   console.log(
     'Fetching',
@@ -66,11 +73,15 @@ const fetchAllVaults = async (ctx) => {
 };
 
 module.exports.handler = handler(async () => {
-  const provider = new providers.WebSocketProvider(process.env.WEB3_ENDPOINT_WSS);
+  const provider = new providers.WebSocketProvider(
+    process.env.WEB3_ENDPOINT_WSS,
+  );
   const etherscan = process.env.ETHERSCAN_API_KEY;
   const ctx = new yearn.Context({ provider, etherscan });
 
   const vaults = await fetchAllVaults(ctx);
+
+  console.log('Calculating apy');
 
   // ROI
   await Promise.all(
