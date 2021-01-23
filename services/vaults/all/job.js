@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 
-const { WebSocketProvider } = require('@ethersproject/providers');
+const { providers } = require('ethers');
 const yearn = require('@yfi/sdk');
 
 const unix = require('../../../lib/timestamp');
@@ -66,7 +66,7 @@ const fetchAllVaults = async (ctx) => {
 };
 
 module.exports.handler = handler(async () => {
-  const provider = new WebSocketProvider(process.env.WEB3_ENDPOINT_WSS);
+  const provider = new providers.WebSocketProvider(process.env.WEB3_ENDPOINT_WSS);
   const etherscan = process.env.ETHERSCAN_API_KEY;
   const ctx = new yearn.Context({ provider, etherscan });
 
