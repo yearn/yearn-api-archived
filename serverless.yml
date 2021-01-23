@@ -239,7 +239,6 @@ functions:
                 description: 'if true, then the full historic TVL values from DB are delivered'
                 type: 'boolean'
                 required: false
-
   tvl-save:
     handler: services/tvl/save/handler.handler
     events:
