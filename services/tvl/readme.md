@@ -10,10 +10,12 @@
   - Sum up Strategy Holdings in USD.
   - Subtract WETH, TUSD, and DAI Strategy Holdings since these are all delegated to yCRV.
   - Subtract USDT, USDC, and aLINK strategy since they all feed to 3pool. LINK doesn't have a separate strategy.
+  - Subtract mUSD Strategy Holdings since these are in the mUSD3crv vault.
 - **Total Vault Holdings**
   - Sum up Vault Holdings in USD.
-  - Subtract Strategy Holdings for ETH, DAI, and TUSD since all are in yCRV Vault.
+  - Subtract Strategy Holdings for EURS, ETH, DAI, and TUSD since all are in yCRV Vault.
   - Subtract Strategy Holdings for aLINK, USDC, and USDT and subtract Vault Holdings for LINK since these are all in the 3pool Vault.
+  - Subtract mUSD Strategy Holdings since these are in the mUSD3crv vault.
 - **Total Value Locked**
   - Start with Total Vault Holdings.
   - Add Total Earn Holdings.
@@ -73,6 +75,10 @@ GUSD Pool
 
 - Contract `0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6`
 
+EURS Pool
+
+- Contract `0x0Ce6a5fF5217e38315f87032CF90686C96627CAA`
+
 ### Non-Stablecoin yVault Contracts
 
 **Order**
@@ -87,8 +93,9 @@ YFI
 aLINK
 WETH
 LINK (no strategy)
+eursCRV pool
 
-**Vaults, 11 total**
+**Vaults, 12 total**
 0x629c759D1E83eFbF63d84eb3868B564d9521C129
 0x9cA85572E6A3EbF24dEDd195623F188735A5179f
 0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c
@@ -100,10 +107,11 @@ LINK (no strategy)
 0x29E240CFD7946BA20895a7a02eDb25C210f9f324
 0xe1237aA7f535b0CC33Fd973D66cBf830354D16c7
 0x881b06da56BB5675c54E4Ed311c21E54C5025298
+0x98B058b2CBacF5E99bC7012DF757ea7CFEbd35BC
 
 Read `balance`, then multiply by `get_virtual_price` for Curve pools, and by price from Uniquote for everything else. For sBTC pool read `balance`, then multiply by `get_virtual_price` for Curve pools, and then by price from Uniquote for WBTC.
 
-**Strategies, 10 total**
+**Strategies, 11 total**
 0x530da5aeF3c8f9CCbc75C97C182D6ee2284B643F
 0xC59601F0CC49baa266891b7fc63d2D5FE097A79D
 0x07DB4B9b3951094B9E278D336aDf46a036295DE7
@@ -114,6 +122,7 @@ Read `balance`, then multiply by `get_virtual_price` for Curve pools, and by pri
 0x395F93350D5102B6139Abfc84a7D6ee70488797C
 0x25fAcA21dd2Ad7eDB3a027d543e617496820d8d6
 0x932fc4fd0eEe66F22f1E23fBA74D7058391c0b15
+0x22422825e2dFf23f645b04A3f89190B69f174659
 
 Read `balanceOf`, then multiply by `get_virtual_price` for Curve pools, and by price from Uniquote for everything else. For sBTC pool read `balanceOf`, then multiply by `get_virtual_price` for Curve pools, and then by price from Uniquote for WBTC.
 
@@ -125,24 +134,27 @@ TUSD
 USDC
 USDT
 GUSD
+mUSD
 
 All prices are assumed to be equal to 1 USD. USDC and USDT have 6 decimals, GUSD has 2.
 
-**Vaults, 5 total**
+**Vaults, 6 total**
 0xACd43E627e64355f1861cEC6d3a6688B31a6F952
 0x37d19d1c4E1fa9DC47bD1eA12f742a0887eDa74a
 0x597aD1e0c13Bfe8025993D9e79C69E1c0233522e
 0x2f08119C6f07c006695E079AAFc638b8789FAf18
 0xec0d8D3ED5477106c6D4ea27D90a60e594693C90
+0xE0db48B4F71752C4bEf16De1DBD042B82976b8C7
 
 For all of these, read `balance`, no need to multiply by anything.
 
-**Strategies, 5 total**
+**Strategies, 6 total**
 0xAa880345A3147a1fC6889080401C791813ed08Dc
 0xe3a711987612BFD1DAFa076506f3793c78D81558
 0x4720515963A9d40ca10B1aDE806C1291E6c9A86d
 0xc7e437033D849474074429Cbe8077c971Ea2a852
 0xc8327D8E1094a94466e05a2CC1f10fA70a1dF119
+0x6f1EbF5BBc5e32fffB6B3d237C3564C15134B8cF
 
 For all of these, read `balanceOf`, no need to multiply by anything.
 
@@ -208,6 +220,7 @@ Subtract `tusd_strategy`
 Subtract `alink_strategy`
 Subtract `usdt_strategy`
 Subtract `usdc_strategy`
+Subtract `musd_strategy`
 
 Resultant is `total_strategy_holdings`
 
@@ -220,6 +233,7 @@ Subtract `alink_strategy`
 Subtract `usdt_strategy`
 Subtract `usdc_strategy`
 Subtract `link_vault`
+Subtract `musd_strategy`
 
 Resultant is `total_vault_holdings`
 

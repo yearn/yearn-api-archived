@@ -66,7 +66,8 @@ const readVault = async (vault) => {
       vault.symbol === 'yvcDAI+cUSDC' ||
       vault.symbol === 'crvBUSD' ||
       vault.symbol === 'crvBTC' ||
-      vault.symbol === '3Crv'
+      vault.symbol === '3Crv' ||
+      vault.symbol === 'eursCRV'
     ) {
       const pool = _.find(pools, { symbol });
       const currentBlockNbr = await web3.eth.getBlockNumber();
@@ -84,7 +85,8 @@ const readVault = async (vault) => {
       vault.symbol === 'GUSD' ||
       vault.symbol === 'USDT' ||
       vault.symbol === 'DAI' ||
-      vault.symbol === 'aLINK'
+      vault.symbol === 'aLINK' ||
+      vault.symbol === 'mUSD'
     ) {
       priceFeed = 1;
     }
