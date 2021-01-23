@@ -13,7 +13,7 @@ const yRegistryAbi = require('../../../abi/yRegistry.json');
 const vaultAbi = require('../../../abi/vaultV5.json');
 
 const db = dynamodb.doc;
-const web3 = new Web3(process.env.WEB3_ENDPOINT);
+const web3 = new Web3(process.env.WEB3_ENDPOINT_HTTPS);
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 const yRegistryAddress = '0x3ee41c098f9666ed2ea246f4d2558010e59d63a0';
 const delayTime = 300;
@@ -60,6 +60,9 @@ const saveVault = async (vault) => {
     TableName: 'vaults',
     Item: vault,
   };
+  if (vault.address === '0xec0d8D3ED5477106c6D4ea27D90a60e594693C90') {
+    return;
+  }
   await db
     .put(params)
     .promise()

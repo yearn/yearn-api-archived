@@ -14,7 +14,7 @@ const { getBoost } = require('./getBoost');
 
 const db = dynamodb.doc;
 const archiveNodeUrl = process.env.ARCHIVENODE_ENDPOINT;
-const infuraUrl = process.env.WEB3_ENDPOINT;
+const infuraUrl = process.env.WEB3_ENDPOINT_HTTPS;
 const archiveNodeWeb3 = new Web3(archiveNodeUrl);
 const infuraWeb3 = new Web3(infuraUrl);
 const blocks = new EthDater(archiveNodeWeb3, delayTime);
