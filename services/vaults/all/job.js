@@ -2,9 +2,7 @@
 
 require('dotenv').config();
 
-const _ = require('lodash');
-
-const { providers } = require('ethers');
+const { WebSocketProvider } = require('@ethersproject/providers');
 const yearn = require('@yfi/sdk');
 
 const unix = require('../../../lib/timestamp');
@@ -31,10 +29,16 @@ const fetchAllVaults = async (ctx) => {
     return address !== '0xec0d8D3ED5477106c6D4ea27D90a60e594693C90';
   });
 
-  // remove active from experimental
-  v2ExperimentalAddresses = v2ExperimentalAddresses.filter(
-    (address) => !v2Addresses.includes(address),
-  );
+  v2Addresses = v2Addresses.filter((address) => {
+    return ![
+      '0xBFa4D8AA6d8a379aBFe7793399D3DdaCC5bBECBB',
+      '0xe2F6b9773BF3A015E2aA70741Bde1498bdB9425b',
+    ].includes(address);
+  });
+
+  v2ExperimentalAddresses = v2ExperimentalAddresses.filter((address) => {
+    return !v2Addresses.includes(address);
+  });
 
   console.log(
     'Fetching',
@@ -73,15 +77,11 @@ const fetchAllVaults = async (ctx) => {
 };
 
 module.exports.handler = handler(async () => {
-  const provider = new providers.WebSocketProvider(
-    process.env.WEB3_ENDPOINT_WSS,
-  );
+  const provider = new WebSocketProvider(process.env.WEB3_ENDPOINT_WSS);
   const etherscan = process.env.ETHERSCAN_API_KEY;
   const ctx = new yearn.Context({ provider, etherscan });
 
   const vaults = await fetchAllVaults(ctx);
-
-  console.log('Calculating apy');
 
   // ROI
   await Promise.all(
@@ -104,11 +104,11 @@ module.exports.handler = handler(async () => {
   const aliases = await yearn.data.assets.fetchAliases();
 
   for (const vault of vaults) {
-    const alias = aliases[vault.tokenAddress];
+    const alias = aliases[vault.token.address];
     vault.token.displayName = alias ? alias.symbol : vault.token.symbol;
     vault.displayName = vault.token.displayName;
 
-    vault.token.icon = assets[vault.tokenAddress] || null;
+    vault.token.icon = assets[vault.token.address] || null;
     vault.icon = assets[vault.address] || null;
   }
 
