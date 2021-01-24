@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 
-const { WebSocketProvider } = require('@ethersproject/providers');
+const { providers } = require('ethers');
 const yearn = require('@yfi/sdk');
 
 const unix = require('../../../lib/timestamp');
@@ -77,7 +77,9 @@ const fetchAllVaults = async (ctx) => {
 };
 
 module.exports.handler = handler(async () => {
-  const provider = new WebSocketProvider(process.env.WEB3_ENDPOINT_WSS);
+  const provider = new providers.WebSocketProvider(
+    process.env.WEB3_ENDPOINT_WSS,
+  );
   const etherscan = process.env.ETHERSCAN_API_KEY;
   const ctx = new yearn.Context({ provider, etherscan });
 
@@ -104,9 +106,16 @@ module.exports.handler = handler(async () => {
   const aliases = await yearn.data.assets.fetchAliases();
 
   for (const vault of vaults) {
-    const alias = aliases[vault.token.address];
-    vault.token.displayName = alias ? alias.symbol : vault.token.symbol;
-    vault.displayName = vault.token.displayName;
+    const tokenAlias = aliases[vault.token.address];
+    const vaultAlias = aliases[vault.address];
+    vault.token.displayName = tokenAlias
+      ? tokenAlias.symbol
+      : vault.token.symbol;
+    vault.displayName = vaultAlias
+      ? vaultAlias.symbol
+      : tokenAlias
+      ? tokenAlias.symbol
+      : vault.name;
 
     vault.token.icon = assets[vault.token.address] || null;
     vault.icon = assets[vault.address] || null;
