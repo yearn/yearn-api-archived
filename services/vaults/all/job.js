@@ -106,17 +106,9 @@ module.exports.handler = handler(async () => {
   const aliases = await yearn.data.assets.fetchAliases();
 
   for (const vault of vaults) {
-    const tokenAlias = aliases[vault.token.address];
-    const vaultAlias = aliases[vault.address];
-    vault.token.displayName = tokenAlias
-      ? tokenAlias.symbol
-      : vault.token.symbol;
-    vault.displayName = vaultAlias
-      ? vaultAlias.symbol
-      : tokenAlias
-      ? tokenAlias.symbol
-      : vault.name;
-
+    const alias = aliases[vault.token.address];
+    vault.token.displayName = alias ? alias.symbol : vault.token.symbol;
+    vault.displayName = vault.token.displayName;
     vault.token.icon = assets[vault.token.address] || null;
     vault.icon = assets[vault.address] || null;
   }
