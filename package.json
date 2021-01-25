@@ -27,7 +27,7 @@
     "serverless-offline": "^6.7.0"
   },
   "dependencies": {
-    "@yfi/sdk": "0.0.4",
+    "@yfi/sdk": "0.0.7",
     "aws-sdk": "^2.790.0",
     "axios": "^0.21.1",
     "bignumber": "^1.1.0",
