@@ -121,7 +121,7 @@ functions:
 
   vaults-all-job:
     handler: services/vaults/all/job.handler
-    timeout: 30
+    timeout: 300
     events:
       - schedule:
           rate: rate(10 minutes)
@@ -172,7 +172,7 @@ functions:
 
   vaults-save:
     handler: services/vaults/save/handler.handler
-    timeout: 30
+    timeout: 300
     events:
       - schedule:
           rate: rate(1 hour)
@@ -195,7 +195,7 @@ functions:
 
   vaults-apy-save:
     handler: services/vaults/apy/save/handler.handler
-    timeout: 30
+    timeout: 300
     events:
       - schedule:
           rate: rate(30 minutes)
@@ -218,7 +218,7 @@ functions:
 
   vaults-holdings-save:
     handler: services/vaults/holdings/save/handler.handler
-    timeout: 30
+    timeout: 300
     events:
       - schedule:
           rate: rate(1 hour)
@@ -245,7 +245,7 @@ functions:
                 required: false
   tvl-save:
     handler: services/tvl/save/handler.handler
-    timeout: 30
+    timeout: 300
     events:
       - schedule:
           rate: rate(1 hour)
@@ -436,7 +436,7 @@ functions:
   # /yearn
   yearn-repos-save:
     handler: services/yearn/repos/save/handler.handler
-    timeout: 30
+    timeout: 300
 
   yearn-repos:
     handler: services/yearn/repos/handler.handler
