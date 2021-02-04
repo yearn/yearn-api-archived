@@ -33,7 +33,6 @@ const fetchAliasMetadata = async () => {
   return resp;
 };
 
-
 const fetchContractName = async (address) => {
   const metadata = await fetchContractMetadata(address);
   const contractName = metadata.ContractName;
@@ -109,7 +108,6 @@ module.exports.handler = handler(async () => {
 
     const vaultAlias = tokenSymbolAlias || tokenSymbol;
 
-    
     // githack provides proper Conttent-Type headers and caching via cloudflare
     // To purge cache go to: https://raw.githack.com/#purge
     const tokenIcon = `https://rawcdn.githack.com/iearn-finance/yearn-assets/master/icons/tokens/${tokenAddress}/logo-128.png`;
