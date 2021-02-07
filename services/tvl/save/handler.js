@@ -2,6 +2,7 @@
 
 const handler = require('../../../lib/handler');
 const dynamodb = require('../../../utils/dynamoDb');
+const { v4: uuidv4 } = require('uuid');
 
 const db = dynamodb.doc;
 
@@ -134,6 +135,7 @@ const calcTvl = async () => {
     totalVaultHoldingsUSD: totalVaultHoldings,
     timestamp: Date.now(),
     calculations,
+    uuid: uuidv4(),
   };
 
   return output;
