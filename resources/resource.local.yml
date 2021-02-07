@@ -54,12 +54,12 @@ Resources:
       TableName: historicTvl
       BillingMode: PAY_PER_REQUEST
       KeySchema:
-        - AttributeName: TvlUSD
+        - AttributeName: uuid
           KeyType: HASH
         - AttributeName: timestamp
           KeyType: RANGE
       AttributeDefinitions:
-        - AttributeName: TvlUSD
-          AttributeType: N
+        - AttributeName: uuid
+          AttributeType: S
         - AttributeName: timestamp
           AttributeType: N

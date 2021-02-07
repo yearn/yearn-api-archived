@@ -23,5 +23,16 @@ module.exports.handler = handler(async (event) => {
   if (showHistoric) {
     return holdings;
   }
-  return holdings[holdings.length - 1];
+  var res = Math.max.apply(
+    Math,
+    holdings.map(function (o) {
+      return o.timestamp;
+    }),
+  );
+
+  var obj = holdings.find(function (o) {
+    return o.timestamp == res;
+  });
+
+  return obj;
 });
