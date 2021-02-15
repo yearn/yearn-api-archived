@@ -8,7 +8,7 @@ const db = dynamodb.doc;
 
 const saveTvl = async (data) => {
   const params = {
-    TableName: 'historicTvl',
+    TableName: 'tvlV1',
     Item: data,
   };
   await db
