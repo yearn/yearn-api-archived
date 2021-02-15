@@ -8,7 +8,7 @@ const db = dynamodb.doc;
 
 const getHoldings = async () => {
   const params = {
-    TableName: 'historicTvl',
+    TableName: 'tvlV1',
   };
   const entries = await db.scan(params).promise();
   const holdings = entries.Items;
