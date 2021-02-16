@@ -51,7 +51,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
     Properties:
-      TableName: historicTvl
+      TableName: tvlV1
       BillingMode: PAY_PER_REQUEST
       KeySchema:
         - AttributeName: uuid
