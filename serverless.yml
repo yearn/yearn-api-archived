@@ -191,7 +191,7 @@ functions:
             tags:
               - Vaults
             description: >
-              Vault APY is calculated based on the following document: https://hackmd.io/BQChrnqRQ3-HHx-0oZZZug?view
+              Calcualted from: yearlyRoi = 100 * ((1 + returnSincePrevBlock) ** (365 / days) - 1); -- @note: calculations: https://github.com/iearn-finance/yearn-api/blob/1a47791c44c245c433875ca5c4cb473bb5e98cce/services/vaults/apy/save/handler.js#L60
 
   vaults-apy-save:
     handler: services/vaults/apy/save/handler.handler
