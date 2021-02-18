@@ -3,8 +3,10 @@
 const handler = require('../../../lib/handler');
 const dynamodb = require('../../../utils/dynamoDb');
 const { v4: uuidv4 } = require('uuid');
+const fetch = require('node-fetch');
 
 const db = dynamodb.doc;
+const yearnDataURL = 'https://vaults.finance';
 
 const saveTvl = async (data) => {
   const params = {
@@ -37,6 +39,8 @@ const calcTvl = async () => {
   let veCRV = 0;
   let doubleCountedVaults = 0;
   let holding;
+  let ironBankTvl = 0;
+  let tvlV2 = 0;
 
   // eslint-disable-next-line no-restricted-syntax
   for (holding in holdings) {
@@ -110,29 +114,43 @@ const calcTvl = async () => {
       }
     }
   }
+
+  ironBankTvl = await fetch(
+    yearnDataURL + '/integrations/cream/ironbank/tvl',
+  ).then((res) => res.json());
+  tvlV2 = await fetch(yearnDataURL + '/tvl/v2').then((res) => res.json());
+  let ironBankTvl_ = 'tvl' in ironBankTvl ? ironBankTvl.IronBankTVL : 0;
+  let tvlV2_ = 'tvl' in tvlV2 ? tvlV2.tvl : 0;
+
   tvl =
     totalVaultHoldings +
     totalPoolBalanceUSD +
     stakedYFI +
     veCRV -
-    doubleCountedVaults;
+    doubleCountedVaults +
+    ironBankTvl_ +
+    tvlV2_;
   console.log('totalVaultHoldings:', totalVaultHoldings);
   console.log('totalPoolBalanceUSD:', totalPoolBalanceUSD);
   console.log('totalStrategyHoldings:', totalStrategyHoldings);
   console.log('stakedYFI:', stakedYFI);
   console.log('veCRV:', veCRV);
   console.log('doubleCountedVaults:', doubleCountedVaults);
+  console.log('Iron Bank', ironBankTvl_);
+  console.log('TVLV2', tvlV2_);
 
   const calculations = {
     totalVaultHoldings:
       'Sum of vaultHoldings from Holdings endpoint - DAI.strategyHoldings - WETH.strategyHoldings - TUSD.strategyHoldings - aLINK.strategyHoldings - USDT.strategyHoldings - USDC.strategyHoldings - LINK.vaultHoldings - mUSD.strategyHoldings',
     tvl:
-      'totalVaultHoldings + yCRV.poolBalanceUSD + crvBUSD.poolBalanceUSD + yWBTC.PoolbalanceUSD + YFI.stakdYFI + veCRV.veVRCLocked - yCRV.vaultHoldings - crvBUSD.vaultHoldings - YFI.vaultHoldings',
+      'totalVaultHoldings + yCRV.poolBalanceUSD + crvBUSD.poolBalanceUSD + yWBTC.PoolbalanceUSD + YFI.stakdYFI + veCRV.veVRCLocked - yCRV.vaultHoldings - crvBUSD.vaultHoldings - YFI.vaultHoldings + IronBankTvl + TVLV2',
   };
   const output = {
     TvlUSD: tvl,
     totalEarnHoldingsUSD: totalPoolBalanceUSD,
     totalVaultHoldingsUSD: totalVaultHoldings,
+    ironBankTvl: ironBankTvl_,
+    tvlV2: tvlV2_,
     timestamp: Date.now(),
     calculations,
     uuid: uuidv4(),
@@ -142,7 +160,7 @@ const calcTvl = async () => {
 };
 
 module.exports.handler = handler(async () => {
-  const tvl = await calcTvl();
+  let tvl = await calcTvl();
   await saveTvl(tvl);
   return tvl;
 });
