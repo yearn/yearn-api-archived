@@ -116,11 +116,11 @@ const calcTvl = async () => {
   }
 
   ironBankTvl = await fetch(
-    yearnDataURL + '/integrations/cream/ironbank/tvl',
+    `${yearnDataURL}/integrations/cream/ironbank/tvl`,
   ).then((res) => res.json());
-  tvlV2 = await fetch(yearnDataURL + '/tvl/v2').then((res) => res.json());
-  let ironBankTvl_ = 'tvl' in ironBankTvl ? ironBankTvl.IronBankTVL : 0;
-  let tvlV2_ = 'tvl' in tvlV2 ? tvlV2.tvl : 0;
+  tvlV2 = await fetch(`${yearnDataURL}/tvl/v2`).then((res) => res.json());
+  const ironBankTvl_ = 'tvl' in ironBankTvl ? ironBankTvl.tvl : 0;
+  const tvlV2_ = 'tvl' in tvlV2 ? tvlV2.tvl : 0;
 
   tvl =
     totalVaultHoldings +
@@ -160,7 +160,7 @@ const calcTvl = async () => {
 };
 
 module.exports.handler = handler(async () => {
-  let tvl = await calcTvl();
+  const tvl = await calcTvl();
   await saveTvl(tvl);
   return tvl;
 });
