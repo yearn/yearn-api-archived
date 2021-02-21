@@ -64,7 +64,7 @@ const getApy = async (previousValue, currentValue, previousBlockNbr) => {
   const blockDelta = currentBlockNbr - previousBlockNbr;
   const returnSincePrevBlock = (currentValue - previousValue) / previousValue;
   const days = blockDelta / nbrBlocksInDay;
-  const yearlyRoi = 100 * ((1 + returnSincePrevBlock) ** (365 / days) - 1);
+  const yearlyRoi = 100 * ((1 + returnSincePrevBlock) ** (365.2425 / days) - 1);
   return yearlyRoi;
 };
 
