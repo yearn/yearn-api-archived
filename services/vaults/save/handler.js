@@ -108,8 +108,10 @@ module.exports.handler = handler(async () => {
 
     const vaultAlias = tokenSymbolAlias || tokenSymbol;
 
-    const tokenIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${tokenAddress}/logo-128.png`;
-    const vaultIcon = `https://raw.githubusercontent.com/iearn-finance/yearn-assets/master/icons/tokens/${vaultAddress}/logo-128.png`;
+    // githack provides proper Conttent-Type headers and caching via cloudflare
+    // To purge cache go to: https://raw.githack.com/#purge
+    const tokenIcon = `https://rawcdn.githack.com/iearn-finance/yearn-assets/master/icons/tokens/${tokenAddress}/logo-128.png`;
+    const vaultIcon = `https://rawcdn.githack.com/iearn-finance/yearn-assets/master/icons/tokens/${vaultAddress}/logo-128.png`;
     const vault = {
       address: vaultAddress,
       name: vaultName,
